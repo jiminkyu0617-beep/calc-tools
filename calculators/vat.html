@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부가세 계산기 — 공급가액·부가세·합계 자동 환산</title>
+<meta name="description" content="공급가액, 부가세(10%), 합계금액 중 하나만 입력하면 나머지 두 값을 자동으로 계산합니다. 세금계산서 발행 전 확인용, 무료.">
+<link rel="canonical" href="https://example.com/calculators/vat.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="../index.html">계산<span>모음</span></a>
+</header>
+
+<div class="wrap">
+  <h1>부가세 계산기</h1>
+  <p class="lead">공급가액, 부가세(10%), 합계금액 — 셋 중 하나만 알면 나머지 두 값을 바로 계산합니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label>계산 기준</label>
+      <input type="hidden" id="mode" value="supply">
+      <div class="row3" role="tablist">
+        <button type="button" class="calc" id="btnSupply" onclick="setMode('supply')">공급가액 기준</button>
+        <button type="button" class="calc" id="btnTotal" onclick="setMode('total')" style="background:#94a3b8">합계금액 기준</button>
+        <button type="button" class="calc" id="btnVat" onclick="setMode('vat')" style="background:#94a3b8">부가세 기준</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="inputLabel">공급가액 (부가세 제외 금액)</label>
+      <input type="number" id="amount" placeholder="예: 1000000" oninput="calc()">
+    </div>
+
+    <div class="result show" id="resultBox">
+      <table>
+        <tr><td>공급가액</td><td id="rSupply">0원</td></tr>
+        <tr><td>부가세 (10%)</td><td id="rVat">0원</td></tr>
+        <tr><td><b>합계금액</b></td><td id="rTotal"><b>0원</b></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>계산 방식</h3>
+    <ul>
+      <li>부가가치세율 10% (부가가치세법 제30조) 기준, 일반과세자 표준세율입니다.</li>
+      <li>공급가액 기준: 부가세 = 공급가액 × 10%, 합계 = 공급가액 × 1.1</li>
+      <li>합계금액 기준(부가세 포함 금액에서 역산): 공급가액 = 합계 ÷ 1.1, 부가세 = 합계 − 공급가액</li>
+      <li>간이과세자는 업종별 부가가치율이 달라 이 계산기와 다릅니다 — 별도 확인이 필요합니다.</li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">
+    이 계산 결과는 참고용입니다. 실제 세금계산서 발행·신고 금액은 사업자 유형과
+    거래 조건에 따라 달라질 수 있으니 세무사 또는 홈택스에서 다시 확인하세요.
+  </p>
+</div>
+
+<script>
+let mode = 'supply';
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btnSupply').style.background = m === 'supply' ? '' : '#94a3b8';
+  document.getElementById('btnTotal').style.background = m === 'total' ? '' : '#94a3b8';
+  document.getElementById('btnVat').style.background = m === 'vat' ? '' : '#94a3b8';
+
+  const label = document.getElementById('inputLabel');
+  if (m === 'supply') label.textContent = '공급가액 (부가세 제외 금액)';
+  if (m === 'total') label.textContent = '합계금액 (부가세 포함 금액)';
+  if (m === 'vat') label.textContent = '부가세 금액';
+
+  calc();
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+function calc() {
+  const v = parseFloat(document.getElementById('amount').value) || 0;
+  let supply, vat, total;
+
+  if (mode === 'supply') {
+    supply = v;
+    vat = v * 0.1;
+    total = v * 1.1;
+  } else if (mode === 'total') {
+    total = v;
+    supply = v / 1.1;
+    vat = total - supply;
+  } else {
+    vat = v;
+    supply = v / 0.1;
+    total = supply + vat;
+  }
+
+  document.getElementById('rSupply').textContent = fmt(supply);
+  document.getElementById('rVat').textContent = fmt(vat);
+  document.getElementById('rTotal').innerHTML = '<b>' + fmt(total) + '</b>';
+}
+
+setMode('supply');
+</script>
+</body>
+</html>

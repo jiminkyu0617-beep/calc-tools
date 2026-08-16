@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>퇴직금 계산기 — 입사일·퇴사일로 3분만에 계산 (2026 근로기준법 기준)</title>
+<meta name="description" content="입사일, 퇴사일, 최근 3개월 급여만 입력하면 근로기준법 평균임금 방식으로 예상 퇴직금을 계산합니다. 상여금·연차수당 반영 가능, 무료.">
+<link rel="canonical" href="https://example.com/calculators/retirement-pay.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="../index.html">계산<span>모음</span></a>
+</header>
+
+<div class="wrap">
+  <h1>퇴직금 계산기</h1>
+  <p class="lead">입사일·퇴사일과 최근 3개월 급여만 넣으면 근로기준법상 평균임금 방식으로 예상 퇴직금을 계산합니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label>입사일</label>
+      <input type="date" id="hireDate">
+    </div>
+    <div class="field">
+      <label>퇴사일 <span class="hint">(마지막 근무일 다음날, 보통 퇴직 신고일)</span></label>
+      <input type="date" id="leaveDate">
+    </div>
+
+    <div class="field">
+      <label>퇴직 전 3개월간 월급여 <span class="hint">(세전 총액, 3개월분을 각각 입력)</span></label>
+      <div class="row3">
+        <input type="number" id="pay1" placeholder="1개월 전">
+        <input type="number" id="pay2" placeholder="2개월 전">
+        <input type="number" id="pay3" placeholder="3개월 전">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>연간 상여금 총액 <span class="hint">(선택, 0이면 비움)</span></label>
+        <input type="number" id="bonus" placeholder="0" value="0">
+      </div>
+      <div class="field">
+        <label>연차수당 총액 <span class="hint">(선택, 0이면 비움)</span></label>
+        <input type="number" id="leavePay" placeholder="0" value="0">
+      </div>
+    </div>
+
+    <button class="calc" onclick="calc()">퇴직금 계산하기</button>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div class="result" id="resultBox">
+      <div style="font-size:13px;color:var(--muted)">예상 퇴직금</div>
+      <div class="amount" id="resultAmount">0원</div>
+      <table>
+        <tr><td>재직일수</td><td id="rDays">-</td></tr>
+        <tr><td>평균임금 산정 기간</td><td id="rPeriod">-</td></tr>
+        <tr><td>1일 평균임금</td><td id="rAvgWage">-</td></tr>
+        <tr><td>계산식</td><td id="rFormula">-</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>계산 방식 (근로기준법 제2조·제34조 기준)</h3>
+    <ul>
+      <li>평균임금 = (최근 3개월 급여 총액 + 연간상여금×3/12 + 연차수당×3/12) ÷ 그 3개월간 총일수</li>
+      <li>퇴직금 = 1일 평균임금 × 30일 × (재직일수 ÷ 365)</li>
+      <li>계속근로기간이 1년 미만이면 법정 퇴직금 지급 대상이 아닙니다.</li>
+      <li>평균임금이 통상임금보다 낮게 나오면 통상임금을 적용합니다 — <b>이 계산기는 통상임금 비교를 하지 않습니다.</b></li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">
+    이 계산 결과는 참고용이며 법적 효력이 없습니다. 실제 지급액은 회사 취업규칙, 통상임금 기준,
+    퇴직소득세 원천징수 등에 따라 달라질 수 있습니다. 정확한 금액은 고용노동부(국번없이 1350) 또는
+    노무사 확인을 권합니다.
+  </p>
+</div>
+
+<script>
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+function calc() {
+  const hire = document.getElementById('hireDate').value;
+  const leave = document.getElementById('leaveDate').value;
+  const p1 = parseFloat(document.getElementById('pay1').value) || 0;
+  const p2 = parseFloat(document.getElementById('pay2').value) || 0;
+  const p3 = parseFloat(document.getElementById('pay3').value) || 0;
+  const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+  const leavePay = parseFloat(document.getElementById('leavePay').value) || 0;
+
+  const warnBox = document.getElementById('warnBox');
+  const resultBox = document.getElementById('resultBox');
+  warnBox.classList.remove('show');
+  resultBox.classList.remove('show');
+
+  if (!hire || !leave) {
+    warnBox.textContent = '입사일과 퇴사일을 모두 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+  const hireDate = new Date(hire);
+  const leaveDate = new Date(leave);
+  if (leaveDate <= hireDate) {
+    warnBox.textContent = '퇴사일은 입사일보다 뒤여야 합니다.';
+    warnBox.classList.add('show');
+    return;
+  }
+  if (p1 <= 0 && p2 <= 0 && p3 <= 0) {
+    warnBox.textContent = '최근 3개월 급여를 최소 1개월분 이상 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+
+  const MS_DAY = 1000 * 60 * 60 * 24;
+  const serviceDays = Math.round((leaveDate - hireDate) / MS_DAY);
+
+  // 평균임금 산정 기간: 퇴사일 이전 3개월
+  const periodStart = new Date(leaveDate);
+  periodStart.setMonth(periodStart.getMonth() - 3);
+  const periodDays = Math.round((leaveDate - periodStart) / MS_DAY);
+
+  const totalWage = p1 + p2 + p3 + (bonus * 3 / 12) + (leavePay * 3 / 12);
+  const avgDailyWage = totalWage / periodDays;
+  const retirementPay = avgDailyWage * 30 * (serviceDays / 365);
+
+  document.getElementById('resultAmount').textContent = fmt(retirementPay);
+  document.getElementById('rDays').textContent = serviceDays.toLocaleString('ko-KR') + '일';
+  document.getElementById('rPeriod').textContent =
+    periodStart.toISOString().slice(0,10) + ' ~ ' + leave + ' (' + periodDays + '일)';
+  document.getElementById('rAvgWage').textContent = fmt(avgDailyWage);
+  document.getElementById('rFormula').textContent =
+    fmt(avgDailyWage) + ' × 30 × (' + serviceDays + '/365)';
+
+  resultBox.classList.add('show');
+
+  if (serviceDays < 365) {
+    warnBox.textContent = '계속근로기간이 1년 미만입니다. 근로기준법상 법정 퇴직금 지급 대상이 아닐 수 있습니다(참고용 수치입니다).';
+    warnBox.classList.add('show');
+  }
+}
+</script>
+</body>
+</html>
