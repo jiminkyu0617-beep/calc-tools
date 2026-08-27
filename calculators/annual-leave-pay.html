@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연차수당 계산기 — 미사용 연차 수당 자동 계산 (월급÷209시간×8시간)</title>
+<meta name="description" content="월 통상임금과 미사용 연차 일수만 입력하면 연차수당을 계산합니다. 209시간 기준 시간당 통상임금·1일 통상임금까지 단계별로 보여줍니다. 2026년 최저시급 10,320원 기준 비교 포함.">
+<link rel="canonical" href="https://jiminkyu0617-beep.github.io/calc-tools/calculators/annual-leave-pay.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="../index.html">계산<span>모음</span></a>
+</header>
+
+<div class="wrap">
+  <h1>연차수당 계산기</h1>
+  <p class="lead">월 통상임금과 미사용 연차 일수를 넣으면 시간당 통상임금 → 1일 통상임금 → 연차수당 순서로 계산 과정을 그대로 보여줍니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label>월 통상임금 <span class="hint">(기본급 + 고정수당, 성과급 제외)</span></label>
+      <input type="number" id="wage" placeholder="예: 2500000">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>미사용 연차 일수</label>
+        <input type="number" id="leaveDays" placeholder="예: 5">
+      </div>
+      <div class="field">
+        <label>월 소정근로시간 <span class="hint">(주40시간=209)</span></label>
+        <input type="number" id="monthHours" value="209">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>1일 소정근로시간 <span class="hint">(보통 8시간)</span></label>
+      <input type="number" id="dayHours" value="8">
+    </div>
+
+    <button class="calc" onclick="calc()">연차수당 계산하기</button>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div class="result" id="resultBox">
+      <div style="font-size:13px;color:var(--muted)">예상 연차수당</div>
+      <div class="amount" id="resultAmount">0원</div>
+      <table>
+        <tr><td>1단계. 시간당 통상임금</td><td id="rHourly">-</td></tr>
+        <tr><td>2단계. 1일 통상임금</td><td id="rDaily">-</td></tr>
+        <tr><td>3단계. 미사용 연차</td><td id="rDays">-</td></tr>
+        <tr><td>계산식</td><td id="rFormula">-</td></tr>
+        <tr><td>참고: 2026년 최저시급 기준 1일분</td><td id="rMin">-</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>계산 방식 (근로기준법 제60조 기준)</h3>
+    <ul>
+      <li>연차수당 = (월 통상임금 ÷ 209시간) × 8시간 × 미사용 연차 일수</li>
+      <li>209시간은 주 40시간 근무자의 월 소정근로시간(주휴시간 포함)입니다. 주 4일제·단시간 근로자는 실제 소정근로시간으로 바꿔 입력하세요.</li>
+      <li>통상임금에는 기본급과 정기적·일률적·고정적으로 지급되는 수당이 들어가고, 실적에 따라 달라지는 성과급은 제외됩니다.</li>
+      <li>2026년 최저임금은 시간당 10,320원으로, 1일(8시간) 연차수당은 82,560원입니다.</li>
+      <li>연차는 발생일로부터 1년간 쓰지 않으면 소멸하지만, 회사가 연차 사용 촉진 절차를 적법하게 밟지 않았다면 수당으로 정산받을 수 있습니다.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <h3>더 알아보기</h3>
+    <ul>
+      <li><a href="https://minggnim17.tistory.com/13">연차수당 계산법 총정리 (2026년 최저시급 10,320원·계산식 3단계)</a></li>
+      <li><a href="../calculators/ordinary-wage.html">통상임금 계산기</a> · <a href="../calculators/retirement-pay.html">퇴직금 계산기</a></li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">
+    이 계산 결과는 참고용이며 법적 효력이 없습니다. 통상임금에 어떤 항목이 포함되는지는 회사 취업규칙·단체협약에 따라
+    달라질 수 있습니다. 정확한 사항은 고용노동부 고객상담센터(국번없이 1350) 또는 노무사에게 확인하시기 바랍니다.
+  </p>
+</div>
+
+<script>
+var MIN_WAGE_2026 = 10320;
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+function calc() {
+  var wage = parseFloat(document.getElementById('wage').value) || 0;
+  var leaveDays = parseFloat(document.getElementById('leaveDays').value) || 0;
+  var monthHours = parseFloat(document.getElementById('monthHours').value) || 0;
+  var dayHours = parseFloat(document.getElementById('dayHours').value) || 0;
+
+  var warnBox = document.getElementById('warnBox');
+  var resultBox = document.getElementById('resultBox');
+  warnBox.classList.remove('show');
+  resultBox.classList.remove('show');
+
+  if (wage <= 0) {
+    warnBox.textContent = '월 통상임금을 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+  if (leaveDays <= 0) {
+    warnBox.textContent = '미사용 연차 일수를 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+  if (monthHours <= 0 || dayHours <= 0) {
+    warnBox.textContent = '소정근로시간은 0보다 커야 합니다.';
+    warnBox.classList.add('show');
+    return;
+  }
+
+  var hourly = wage / monthHours;
+  var daily = hourly * dayHours;
+  var totalPay = daily * leaveDays;
+
+  document.getElementById('resultAmount').textContent = fmt(totalPay);
+  document.getElementById('rHourly').textContent = fmt(hourly) + ' (' + fmt(wage) + ' ÷ ' + monthHours + '시간)';
+  document.getElementById('rDaily').textContent = fmt(daily) + ' (× ' + dayHours + '시간)';
+  document.getElementById('rDays').textContent = leaveDays.toLocaleString('ko-KR') + '일';
+  document.getElementById('rFormula').textContent = fmt(daily) + ' × ' + leaveDays + '일';
+  document.getElementById('rMin').textContent = fmt(MIN_WAGE_2026 * dayHours);
+
+  resultBox.classList.add('show');
+
+  if (hourly < MIN_WAGE_2026) {
+    warnBox.textContent = '시간당 통상임금이 2026년 최저시급(10,320원)보다 낮게 계산됐습니다. 통상임금에 포함해야 할 고정수당이 빠졌는지 급여명세서를 확인해 보세요.';
+    warnBox.classList.add('show');
+  }
+}
+</script>
+</body>
+</html>

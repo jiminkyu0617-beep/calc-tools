@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>통상임금 계산기 — 시간당 통상임금·연장야간휴일수당 계산 (월급÷209시간, 1.5배 가산)</title>
+<meta name="description" content="월 통상임금을 209시간으로 나눠 시간당 통상임금을 구하고, 연장·야간·휴일근로 시간을 입력하면 1.5배 가산수당을 자동 계산합니다. 연장+야간 중복 가산도 반영.">
+<link rel="canonical" href="https://jiminkyu0617-beep.github.io/calc-tools/calculators/ordinary-wage.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="../index.html">계산<span>모음</span></a>
+</header>
+
+<div class="wrap">
+  <h1>통상임금 계산기</h1>
+  <p class="lead">월 통상임금을 시간당 금액으로 환산하고, 연장·야간·휴일근로 시간에 1.5배 가산을 적용해 수당을 계산합니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label>월 통상임금 <span class="hint">(기본급 + 고정수당, 성과급 제외)</span></label>
+      <input type="number" id="wage" placeholder="예: 3000000">
+    </div>
+
+    <div class="field">
+      <label>월 소정근로시간 <span class="hint">(주40시간=209시간)</span></label>
+      <input type="number" id="monthHours" value="209">
+    </div>
+
+    <div class="row3">
+      <div class="field">
+        <label>연장근로 <span class="hint">시간</span></label>
+        <input type="number" id="overtime" placeholder="0" value="0">
+      </div>
+      <div class="field">
+        <label>야간근로 <span class="hint">시간</span></label>
+        <input type="number" id="night" placeholder="0" value="0">
+      </div>
+      <div class="field">
+        <label>휴일근로 <span class="hint">시간</span></label>
+        <input type="number" id="holiday" placeholder="0" value="0">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>연장근로 중 야간시간대(22시~06시)에 겹친 시간 <span class="hint">(선택, 중복 가산분)</span></label>
+      <input type="number" id="overlap" placeholder="0" value="0">
+    </div>
+
+    <button class="calc" onclick="calc()">통상임금·수당 계산하기</button>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div class="result" id="resultBox">
+      <div style="font-size:13px;color:var(--muted)">가산수당 합계</div>
+      <div class="amount" id="resultAmount">0원</div>
+      <table>
+        <tr><td>시간당 통상임금</td><td id="rHourly">-</td></tr>
+        <tr><td>1일 통상임금 (8시간)</td><td id="rDaily">-</td></tr>
+        <tr><td>연장근로수당 (×1.5)</td><td id="rOver">-</td></tr>
+        <tr><td>야간근로수당 (×1.5)</td><td id="rNight">-</td></tr>
+        <tr><td>휴일근로수당 (×1.5)</td><td id="rHoliday">-</td></tr>
+        <tr><td>연장·야간 중복 가산 (×0.5 추가)</td><td id="rOverlap">-</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>계산 방식 (근로기준법 제56조 기준)</h3>
+    <ul>
+      <li>시간당 통상임금 = 월 통상임금 ÷ 209시간</li>
+      <li>209시간 = 주 40시간(1일 8시간×5일) + 주휴 8시간 = 주 48시간 × 4.345주</li>
+      <li>연장·야간·휴일근로는 통상임금의 50% 이상을 가산 → <b>시간당 통상임금 × 시간 × 1.5</b></li>
+      <li>연장근로가 야간시간대(22시~06시)에 걸치면 야간가산 50%가 <b>중복</b>으로 더해집니다(합계 2배).</li>
+      <li>주 4일제·단시간 근로자는 209시간이 아니라 근로계약서상 실제 소정근로시간으로 나눠야 합니다.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <h3>더 알아보기</h3>
+    <ul>
+      <li><a href="https://minggnim17.tistory.com/21">통상임금 계산법 총정리 (월급÷209시간·연장야간수당 1.5배 계산식)</a></li>
+      <li><a href="../calculators/annual-leave-pay.html">연차수당 계산기</a> · <a href="../calculators/four-insurances.html">4대보험료 계산기</a></li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">
+    이 계산 결과는 참고용이며 법적 효력이 없습니다. 어떤 항목이 통상임금에 포함되는지는 회사 취업규칙·단체협약과
+    실제 지급 관행에 따라 달라질 수 있습니다. 정확한 판단은 고용노동부 고객상담센터(국번없이 1350) 또는
+    노무사 상담을 통해 확인하시기 바랍니다.
+  </p>
+</div>
+
+<script>
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+function calc() {
+  var wage = parseFloat(document.getElementById('wage').value) || 0;
+  var monthHours = parseFloat(document.getElementById('monthHours').value) || 0;
+  var overtime = parseFloat(document.getElementById('overtime').value) || 0;
+  var night = parseFloat(document.getElementById('night').value) || 0;
+  var holiday = parseFloat(document.getElementById('holiday').value) || 0;
+  var overlap = parseFloat(document.getElementById('overlap').value) || 0;
+
+  var warnBox = document.getElementById('warnBox');
+  var resultBox = document.getElementById('resultBox');
+  warnBox.classList.remove('show');
+  resultBox.classList.remove('show');
+
+  if (wage <= 0) {
+    warnBox.textContent = '월 통상임금을 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+  if (monthHours <= 0) {
+    warnBox.textContent = '월 소정근로시간은 0보다 커야 합니다.';
+    warnBox.classList.add('show');
+    return;
+  }
+
+  var hourly = wage / monthHours;
+
+  var overPay = hourly * overtime * 1.5;
+  var nightPay = hourly * night * 1.5;
+  var holidayPay = hourly * holiday * 1.5;
+  var overlapPay = hourly * overlap * 0.5;   // 연장수당에 야간가산 50% 추가
+
+  var total = overPay + nightPay + holidayPay + overlapPay;
+
+  document.getElementById('resultAmount').textContent = fmt(total);
+  document.getElementById('rHourly').textContent = fmt(hourly);
+  document.getElementById('rDaily').textContent = fmt(hourly * 8);
+  document.getElementById('rOver').textContent = overtime > 0 ? fmt(overPay) + ' (' + overtime + '시간)' : '-';
+  document.getElementById('rNight').textContent = night > 0 ? fmt(nightPay) + ' (' + night + '시간)' : '-';
+  document.getElementById('rHoliday').textContent = holiday > 0 ? fmt(holidayPay) + ' (' + holiday + '시간)' : '-';
+  document.getElementById('rOverlap').textContent = overlap > 0 ? fmt(overlapPay) + ' (' + overlap + '시간)' : '-';
+
+  resultBox.classList.add('show');
+
+  if (overlap > overtime) {
+    warnBox.textContent = '야간시간대에 겹친 시간이 연장근로 시간보다 많습니다. 입력값을 다시 확인해 주세요.';
+    warnBox.classList.add('show');
+  } else if (total === 0) {
+    warnBox.textContent = '연장·야간·휴일근로 시간을 입력하면 가산수당이 계산됩니다. 지금은 시간당 통상임금만 표시됩니다.';
+    warnBox.classList.add('show');
+  }
+}
+</script>
+</body>
+</html>

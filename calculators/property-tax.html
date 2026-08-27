@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재산세 계산기 — 공시가격으로 주택 재산세 자동 계산 (2026년 1주택 특례 반영)</title>
+<meta name="description" content="주택 공시가격만 입력하면 공정시장가액비율, 누진세율, 도시지역분, 지방교육세까지 반영해 재산세 총액과 7월·9월 분납액을 계산합니다. 1세대 1주택 특례세율 자동 적용.">
+<link rel="canonical" href="https://jiminkyu0617-beep.github.io/calc-tools/calculators/property-tax.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="../index.html">계산<span>모음</span></a>
+</header>
+
+<div class="wrap">
+  <h1>재산세 계산기</h1>
+  <p class="lead">주택 공시가격을 넣으면 과세표준 → 세율 적용 → 도시지역분·지방교육세까지 더한 최종 재산세를 계산합니다. 1세대 1주택이면 특례 비율·특례세율이 자동 적용됩니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label>주택 공시가격 <span class="hint">(부동산공시가격알리미 기준)</span></label>
+      <input type="number" id="price" placeholder="예: 400000000">
+    </div>
+
+    <div class="field">
+      <label>보유 구분</label>
+      <select id="houseType">
+        <option value="one">1세대 1주택 (공시가격 9억원 이하)</option>
+        <option value="multi">다주택자 · 법인 · 9억원 초과</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>도시지역분 포함 여부</label>
+      <select id="urban">
+        <option value="yes">포함 (도시계획구역 내 — 대부분 해당)</option>
+        <option value="no">미포함</option>
+      </select>
+    </div>
+
+    <button class="calc" onclick="calc()">재산세 계산하기</button>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div class="result" id="resultBox">
+      <div style="font-size:13px;color:var(--muted)">연간 재산세 총액</div>
+      <div class="amount" id="resultAmount">0원</div>
+      <table>
+        <tr><td>공정시장가액비율</td><td id="rRatio">-</td></tr>
+        <tr><td>과세표준</td><td id="rBase">-</td></tr>
+        <tr><td>재산세 본세</td><td id="rMain">-</td></tr>
+        <tr><td>도시지역분 (과세표준 × 0.14%)</td><td id="rUrban">-</td></tr>
+        <tr><td>지방교육세 (본세 × 20%)</td><td id="rEdu">-</td></tr>
+        <tr><td>7월 납부분</td><td id="rJul">-</td></tr>
+        <tr><td>9월 납부분</td><td id="rSep">-</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>계산 방식 (지방세법 제110조·제111조 기준)</h3>
+    <ul>
+      <li>과세표준 = 공시가격 × 공정시장가액비율</li>
+      <li><b>공정시장가액비율</b>: 1주택은 3억원 이하 43%, 3억~6억원 44%, 6억원 초과 45% / 다주택·법인은 60%</li>
+      <li><b>표준세율</b>: 6천만원 이하 0.1% / ~1.5억원 6만원+초과분 0.15% / ~3억원 19.5만원+초과분 0.25% / 3억원 초과 57만원+초과분 0.4%</li>
+      <li><b>1세대 1주택 특례세율</b>(공시가격 9억원 이하): 각 구간에서 0.05%p씩 낮은 0.05% / 0.1% / 0.2% / 0.35%</li>
+      <li>도시지역분 = 과세표준 × 0.14%, 지방교육세 = 재산세 본세 × 20%</li>
+      <li>주택 재산세는 7월과 9월에 절반씩 나눠 부과되며, 세액이 20만원 이하면 7월에 한 번에 부과됩니다.</li>
+      <li>과세기준일은 <b>매년 6월 1일</b>입니다. 이날 소유자가 그 해 재산세를 전부 냅니다.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <h3>더 알아보기</h3>
+    <ul>
+      <li><a href="https://minggnim17.tistory.com/15">재산세 9월분 납부기간 9월 16일~30일, 위택스 조회방법 총정리</a></li>
+      <li><a href="../calculators/capital-gains-tax.html">양도소득세 계산기</a></li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">
+    이 계산 결과는 참고용이며 법적 효력이 없습니다. 실제 고지세액은 지역자원시설세, 과세표준 상한제(전년 대비 105~130%),
+    지자체별 탄력세율 적용 등에 따라 달라질 수 있습니다. 정확한 금액은 위택스(wetax.go.kr) 또는 관할 지자체
+    세무과에서 확인하시기 바랍니다.
+  </p>
+</div>
+
+<script>
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+// 공정시장가액비율
+function fairRatio(price, type) {
+  if (type === 'multi') return 0.60;
+  if (price <= 300000000) return 0.43;
+  if (price <= 600000000) return 0.44;
+  return 0.45;
+}
+
+// 재산세 본세 (누진)
+function mainTax(base, special) {
+  if (special) {
+    if (base <= 60000000)  return base * 0.0005;
+    if (base <= 150000000) return 30000 + (base - 60000000) * 0.001;
+    if (base <= 300000000) return 120000 + (base - 150000000) * 0.002;
+    return 420000 + (base - 300000000) * 0.0035;
+  }
+  if (base <= 60000000)  return base * 0.001;
+  if (base <= 150000000) return 60000 + (base - 60000000) * 0.0015;
+  if (base <= 300000000) return 195000 + (base - 150000000) * 0.0025;
+  return 570000 + (base - 300000000) * 0.004;
+}
+
+function calc() {
+  var price = parseFloat(document.getElementById('price').value) || 0;
+  var type = document.getElementById('houseType').value;
+  var urbanOn = document.getElementById('urban').value === 'yes';
+
+  var warnBox = document.getElementById('warnBox');
+  var resultBox = document.getElementById('resultBox');
+  warnBox.classList.remove('show');
+  resultBox.classList.remove('show');
+
+  if (price <= 0) {
+    warnBox.textContent = '주택 공시가격을 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+
+  // 1주택 특례세율은 공시가격 9억원 이하만 적용
+  var special = (type === 'one' && price <= 900000000);
+  var ratio = fairRatio(price, type);
+  var base = price * ratio;
+
+  var main = mainTax(base, special);
+  var urban = urbanOn ? base * 0.0014 : 0;
+  var edu = main * 0.2;
+  var total = main + urban + edu;
+
+  // 7월/9월 분납: 20만원 이하면 7월 일괄
+  var jul, sep;
+  if (total <= 200000) { jul = total; sep = 0; }
+  else { jul = total / 2; sep = total / 2; }
+
+  document.getElementById('resultAmount').textContent = fmt(total);
+  document.getElementById('rRatio').textContent = (ratio * 100).toFixed(0) + '%';
+  document.getElementById('rBase').textContent = fmt(base);
+  document.getElementById('rMain').textContent = fmt(main) + (special ? ' (1주택 특례세율)' : ' (표준세율)');
+  document.getElementById('rUrban').textContent = urbanOn ? fmt(urban) : '미포함';
+  document.getElementById('rEdu').textContent = fmt(edu);
+  document.getElementById('rJul').textContent = fmt(jul);
+  document.getElementById('rSep').textContent = sep > 0 ? fmt(sep) : '없음 (7월 일괄 부과)';
+
+  resultBox.classList.add('show');
+
+  if (type === 'one' && price > 900000000) {
+    warnBox.textContent = '1세대 1주택으로 선택했지만 공시가격이 9억원을 넘어 특례세율 대상이 아닙니다. 표준세율로 계산했습니다(공정시장가액비율은 1주택 45% 적용).';
+    warnBox.classList.add('show');
+  } else if (total <= 200000) {
+    warnBox.textContent = '연간 세액이 20만원 이하라 9월 분납 없이 7월에 한 번에 부과됩니다.';
+    warnBox.classList.add('show');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>퇴직소득세 계산기 — 근속연수공제·환산급여 반영 자동 계산 (2026년 기준)</title>
+<meta name="description" content="퇴직금과 근속연수만 입력하면 근속연수공제·환산급여·환산급여공제를 거쳐 퇴직소득세와 실효세율을 계산합니다. 지방소득세 10% 포함, 계산 단계를 그대로 표시.">
+<link rel="canonical" href="https://jiminkyu0617-beep.github.io/calc-tools/calculators/retirement-income-tax.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="../index.html">계산<span>모음</span></a>
+</header>
+
+<div class="wrap">
+  <h1>퇴직소득세 계산기</h1>
+  <p class="lead">퇴직금과 근속연수를 넣으면 근속연수공제 → 환산급여 → 환산급여공제 → 세율 적용까지 4단계를 그대로 계산해 보여줍니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label>퇴직급여 총액 <span class="hint">(비과세 제외한 세전 퇴직금)</span></label>
+      <input type="number" id="pay" placeholder="예: 50000000">
+    </div>
+
+    <div class="field">
+      <label>근속연수 <span class="hint">(1년 미만은 올림하여 1년으로 계산)</span></label>
+      <input type="number" id="years" placeholder="예: 10">
+    </div>
+
+    <button class="calc" onclick="calc()">퇴직소득세 계산하기</button>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div class="result" id="resultBox">
+      <div style="font-size:13px;color:var(--muted)">예상 퇴직소득세 (지방소득세 포함)</div>
+      <div class="amount" id="resultAmount">0원</div>
+      <table>
+        <tr><td>1단계. 근속연수공제</td><td id="rDeduct1">-</td></tr>
+        <tr><td>2단계. 환산급여</td><td id="rConverted">-</td></tr>
+        <tr><td>3단계. 환산급여공제</td><td id="rDeduct2">-</td></tr>
+        <tr><td>4단계. 과세표준</td><td id="rBase">-</td></tr>
+        <tr><td>적용 세율</td><td id="rRate">-</td></tr>
+        <tr><td>퇴직소득세 (지방소득세 제외)</td><td id="rTax">-</td></tr>
+        <tr><td>지방소득세 (10%)</td><td id="rLocal">-</td></tr>
+        <tr><td>실효세율</td><td id="rEffective">-</td></tr>
+        <tr><td>세후 실수령액</td><td id="rNet">-</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>계산 방식 (소득세법 제48조·제55조 기준)</h3>
+    <ul>
+      <li>환산급여 = (퇴직급여 − 근속연수공제) ÷ 근속연수 × 12</li>
+      <li>과세표준 = 환산급여 − 환산급여공제</li>
+      <li>환산산출세액 = 과세표준 × 세율 − 누진공제액</li>
+      <li>퇴직소득세 = 환산산출세액 ÷ 12 × 근속연수</li>
+      <li><b>근속연수공제</b>: 5년 이하 연 100만원 / 6~10년 500만원+연 200만원 / 11~20년 1,500만원+연 250만원 / 20년 초과 4,000만원+연 300만원</li>
+      <li><b>환산급여공제</b>: 800만원 이하 전액 / ~7,000만원 800만원+초과분 60% / ~1억원 4,520만원+초과분 55% / ~3억원 6,170만원+초과분 45% / 3억원 초과 1억5,170만원+초과분 35%</li>
+      <li>IRP 계좌로 이체해 연금으로 수령하면 연금소득세(3.3~5.5%)가 적용돼 일시금보다 세금이 줄어드는 경우가 많습니다.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <h3>더 알아보기</h3>
+    <ul>
+      <li><a href="https://minggnim17.tistory.com/24">퇴직소득세 계산법 총정리 (근속연수 10년·퇴직금 5000만원 실제 계산 예시)</a></li>
+      <li><a href="../calculators/retirement-pay.html">퇴직금 계산기</a> — 먼저 퇴직금을 계산한 뒤 이 계산기에 넣어보세요.</li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">
+    이 계산 결과는 참고용이며 법적 효력이 없습니다. 실제 세액은 비과세 퇴직급여, 임원 퇴직금 한도, 이연퇴직소득 여부 등에
+    따라 달라질 수 있습니다. 정확한 금액은 국세청 홈택스 퇴직소득세 자동계산 또는 세무 전문가를 통해 확인하시기 바랍니다.
+  </p>
+</div>
+
+<script>
+var MAN = 10000; // 만원 단위
+
+// 종합소득세 세율표 [상한(원), 세율, 누진공제(원)]
+var TAX_BRACKETS = [
+  [14000000,  0.06, 0],
+  [50000000,  0.15, 1260000],
+  [88000000,  0.24, 5760000],
+  [150000000, 0.35, 15440000],
+  [300000000, 0.38, 19940000],
+  [500000000, 0.40, 25940000],
+  [1000000000,0.42, 35940000],
+  [Infinity,  0.45, 65940000]
+];
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+// 근속연수공제 (원 단위)
+function serviceDeduction(y) {
+  if (y <= 5)  return 1000000 * y;
+  if (y <= 10) return 5000000 + 2000000 * (y - 5);
+  if (y <= 20) return 15000000 + 2500000 * (y - 10);
+  return 40000000 + 3000000 * (y - 20);
+}
+
+// 환산급여공제 (원 단위)
+function convertedDeduction(c) {
+  if (c <= 8000000)   return c;
+  if (c <= 70000000)  return 8000000 + (c - 8000000) * 0.6;
+  if (c <= 100000000) return 45200000 + (c - 70000000) * 0.55;
+  if (c <= 300000000) return 61700000 + (c - 100000000) * 0.45;
+  return 151700000 + (c - 300000000) * 0.35;
+}
+
+function applyRate(base) {
+  for (var i = 0; i < TAX_BRACKETS.length; i++) {
+    if (base <= TAX_BRACKETS[i][0]) {
+      return { tax: base * TAX_BRACKETS[i][1] - TAX_BRACKETS[i][2], rate: TAX_BRACKETS[i][1], deduct: TAX_BRACKETS[i][2] };
+    }
+  }
+}
+
+function calc() {
+  var pay = parseFloat(document.getElementById('pay').value) || 0;
+  var years = parseFloat(document.getElementById('years').value) || 0;
+
+  var warnBox = document.getElementById('warnBox');
+  var resultBox = document.getElementById('resultBox');
+  warnBox.classList.remove('show');
+  resultBox.classList.remove('show');
+
+  if (pay <= 0) {
+    warnBox.textContent = '퇴직급여 총액을 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+  if (years <= 0) {
+    warnBox.textContent = '근속연수를 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+
+  var y = Math.ceil(years); // 1년 미만 올림
+
+  var d1 = serviceDeduction(y);
+
+  if (pay <= d1) {
+    document.getElementById('resultAmount').textContent = '0원';
+    document.getElementById('rDeduct1').textContent = fmt(d1);
+    document.getElementById('rConverted').textContent = '0원';
+    document.getElementById('rDeduct2').textContent = '-';
+    document.getElementById('rBase').textContent = '0원';
+    document.getElementById('rRate').textContent = '-';
+    document.getElementById('rTax').textContent = '0원';
+    document.getElementById('rLocal').textContent = '0원';
+    document.getElementById('rEffective').textContent = '0%';
+    document.getElementById('rNet').textContent = fmt(pay);
+    resultBox.classList.add('show');
+    warnBox.textContent = '퇴직급여가 근속연수공제(' + fmt(d1) + ') 이하라 과세표준이 발생하지 않습니다. 퇴직소득세는 0원입니다.';
+    warnBox.classList.add('show');
+    return;
+  }
+
+  var converted = (pay - d1) / y * 12;
+  var d2 = convertedDeduction(converted);
+  var base = Math.max(0, converted - d2);
+
+  var r = applyRate(base);
+  var convertedTax = Math.max(0, r.tax);
+  var tax = convertedTax / 12 * y;
+  var local = tax * 0.1;
+  var totalTax = tax + local;
+
+  document.getElementById('resultAmount').textContent = fmt(totalTax);
+  document.getElementById('rDeduct1').textContent = fmt(d1) + ' (' + y + '년)';
+  document.getElementById('rConverted').textContent = fmt(converted);
+  document.getElementById('rDeduct2').textContent = fmt(d2);
+  document.getElementById('rBase').textContent = fmt(base);
+  document.getElementById('rRate').textContent = (r.rate * 100) + '% (누진공제 ' + fmt(r.deduct) + ')';
+  document.getElementById('rTax').textContent = fmt(tax);
+  document.getElementById('rLocal').textContent = fmt(local);
+  document.getElementById('rEffective').textContent = (totalTax / pay * 100).toFixed(2) + '%';
+  document.getElementById('rNet').textContent = fmt(pay - totalTax);
+
+  resultBox.classList.add('show');
+
+  if (years < 1) {
+    warnBox.textContent = '근속연수 1년 미만은 올림하여 1년으로 계산했습니다. 다만 계속근로기간이 1년 미만이면 법정 퇴직금 지급 대상이 아닐 수 있습니다.';
+    warnBox.classList.add('show');
+  }
+}
+</script>
+</body>
+</html>

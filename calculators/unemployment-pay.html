@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실업급여 계산기 — 예상 수급액·소정급여일수 자동 계산 (2026년 상한 68,100원)</title>
+<meta name="description" content="최근 3개월 급여와 고용보험 가입기간만 입력하면 1일 구직급여액과 소정급여일수, 총 예상 수급액을 계산합니다. 2026년 상한액 68,100원·하한액 66,048원 반영.">
+<link rel="canonical" href="https://jiminkyu0617-beep.github.io/calc-tools/calculators/unemployment-pay.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="../index.html">계산<span>모음</span></a>
+</header>
+
+<div class="wrap">
+  <h1>실업급여 계산기</h1>
+  <p class="lead">최근 3개월 급여와 고용보험 가입기간을 넣으면 1일 구직급여액·소정급여일수·총 예상 수급액을 계산합니다. 2026년 상한액과 하한액이 자동 적용됩니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label>퇴직 전 3개월 급여 총액 <span class="hint">(세전, 3개월 합계)</span></label>
+      <input type="number" id="totalPay" placeholder="예: 9000000">
+    </div>
+
+    <div class="field">
+      <label>그 3개월의 총일수 <span class="hint">(보통 89~92일, 기본값 91)</span></label>
+      <input type="number" id="periodDays" value="91">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>고용보험 가입기간</label>
+        <select id="insuredYears">
+          <option value="0">1년 미만</option>
+          <option value="1">1년 이상 ~ 3년 미만</option>
+          <option value="3">3년 이상 ~ 5년 미만</option>
+          <option value="5">5년 이상 ~ 10년 미만</option>
+          <option value="10">10년 이상</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>퇴직 당시 나이</label>
+        <select id="ageGroup">
+          <option value="under50">만 50세 미만</option>
+          <option value="over50">만 50세 이상 또는 장애인</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="calc" onclick="calc()">실업급여 계산하기</button>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div class="result" id="resultBox">
+      <div style="font-size:13px;color:var(--muted)">총 예상 수급액</div>
+      <div class="amount" id="resultAmount">0원</div>
+      <table>
+        <tr><td>1일 평균임금</td><td id="rAvg">-</td></tr>
+        <tr><td>1일 구직급여액 (평균임금의 60%)</td><td id="rRaw">-</td></tr>
+        <tr><td>상·하한 적용 후 1일 지급액</td><td id="rDaily">-</td></tr>
+        <tr><td>소정급여일수</td><td id="rDays">-</td></tr>
+        <tr><td>계산식</td><td id="rFormula">-</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>계산 방식 (고용보험법 기준)</h3>
+    <ul>
+      <li>1일 평균임금 = 퇴직 전 3개월 임금 총액 ÷ 그 기간의 총일수</li>
+      <li>1일 구직급여액 = 1일 평균임금 × 60%</li>
+      <li>2026년 1일 상한액 68,100원 / 하한액 66,048원 (최저임금 10,320원 × 80% × 8시간)</li>
+      <li>계산값이 상한을 넘으면 상한액, 하한에 못 미치면 하한액이 적용됩니다.</li>
+      <li>소정급여일수는 고용보험 가입기간과 퇴직 당시 나이에 따라 120~270일로 정해집니다.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <h3>더 알아보기</h3>
+    <ul>
+      <li><a href="https://minggnim17.tistory.com/8">실업급여 계산기로 예상 수급액 확인하는 방법 (2026년 상한액 68,100원)</a></li>
+      <li><a href="https://minggnim17.tistory.com/2">실업급여 신청방법과 지급대상 총정리 (2026년 기준)</a></li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">
+    이 계산 결과는 참고용이며 법적 효력이 없습니다. 실제 수급액과 자격 요건은 이직 사유·평균임금 산정 기준에 따라
+    달라질 수 있습니다. 정확한 금액은 고용24(work24.go.kr) 실업급여 모의계산 또는 관할 고용센터에서 확인하시기 바랍니다.
+  </p>
+</div>
+
+<script>
+var UPPER = 68100;   // 2026년 1일 상한액
+var LOWER = 66048;   // 2026년 1일 하한액 (최저임금 10,320원 × 80% × 8시간)
+
+// 소정급여일수: [가입기간 구분][나이 구분]
+var DAYS_TABLE = {
+  '0':  { under50: 120, over50: 120 },
+  '1':  { under50: 150, over50: 180 },
+  '3':  { under50: 180, over50: 210 },
+  '5':  { under50: 210, over50: 240 },
+  '10': { under50: 240, over50: 270 }
+};
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR') + '원';
+}
+
+function calc() {
+  var total = parseFloat(document.getElementById('totalPay').value) || 0;
+  var days = parseFloat(document.getElementById('periodDays').value) || 0;
+  var years = document.getElementById('insuredYears').value;
+  var age = document.getElementById('ageGroup').value;
+
+  var warnBox = document.getElementById('warnBox');
+  var resultBox = document.getElementById('resultBox');
+  warnBox.classList.remove('show');
+  resultBox.classList.remove('show');
+
+  if (total <= 0) {
+    warnBox.textContent = '퇴직 전 3개월 급여 총액을 입력해 주세요.';
+    warnBox.classList.add('show');
+    return;
+  }
+  if (days <= 0) {
+    warnBox.textContent = '산정기간 총일수를 입력해 주세요 (보통 91일).';
+    warnBox.classList.add('show');
+    return;
+  }
+
+  var avgDaily = total / days;
+  var raw = avgDaily * 0.6;
+
+  var daily = raw;
+  var note = '';
+  if (raw > UPPER) { daily = UPPER; note = '상한액 적용'; }
+  else if (raw < LOWER) { daily = LOWER; note = '하한액 적용'; }
+
+  var payDays = DAYS_TABLE[years][age];
+  var totalBenefit = daily * payDays;
+
+  document.getElementById('resultAmount').textContent = fmt(totalBenefit);
+  document.getElementById('rAvg').textContent = fmt(avgDaily);
+  document.getElementById('rRaw').textContent = fmt(raw);
+  document.getElementById('rDaily').textContent = fmt(daily) + (note ? ' (' + note + ')' : '');
+  document.getElementById('rDays').textContent = payDays.toLocaleString('ko-KR') + '일';
+  document.getElementById('rFormula').textContent = fmt(daily) + ' × ' + payDays + '일';
+
+  resultBox.classList.add('show');
+
+  if (years === '0') {
+    warnBox.textContent = '고용보험 가입기간이 1년 미만입니다. 구직급여를 받으려면 이직 전 18개월간 피보험 단위기간이 180일 이상이어야 합니다 — 요건 충족 여부를 먼저 확인하세요.';
+    warnBox.classList.add('show');
+  } else if (note) {
+    warnBox.textContent = '계산된 금액이 ' + note.replace(' 적용','') + '에 걸려 ' + fmt(daily) + '으로 조정됐습니다.';
+    warnBox.classList.add('show');
+  }
+}
+</script>
+</body>
+</html>
