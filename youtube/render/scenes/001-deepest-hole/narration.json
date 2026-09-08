@@ -1,0 +1,131 @@
+{
+  "scene": "001-deepest-hole",
+  "lines": [
+    {
+      "index": 1,
+      "file": "01.wav",
+      "start": 0.6,
+      "end": 4,
+      "window": 3.4,
+      "estimate": 1.6,
+      "text": "여기서 멈췄습니다."
+    },
+    {
+      "index": 2,
+      "file": "02.wav",
+      "start": 4.4,
+      "end": 8.2,
+      "window": 3.8,
+      "estimate": 2,
+      "text": "인간이 판 가장 깊은 구멍."
+    },
+    {
+      "index": 3,
+      "file": "03.wav",
+      "start": 8.4,
+      "end": 12,
+      "window": 3.6,
+      "estimate": 3.2,
+      "text": "십구 년을 파고, 만 이천이백육십이 미터."
+    },
+    {
+      "index": 4,
+      "file": "04.wav",
+      "start": 12.4,
+      "end": 16,
+      "window": 3.6,
+      "estimate": 3,
+      "text": "멈춘 이유는 장비만이 아니었습니다."
+    },
+    {
+      "index": 5,
+      "file": "05.wav",
+      "start": 16.2,
+      "end": 20,
+      "window": 3.8,
+      "estimate": 2.6,
+      "text": "바닥 온도가 백팔십 도였습니다."
+    },
+    {
+      "index": 6,
+      "file": "06.wav",
+      "start": 20.2,
+      "end": 24,
+      "window": 3.8,
+      "estimate": 1.8,
+      "text": "예상은 백 도였습니다."
+    },
+    {
+      "index": 7,
+      "file": "07.wav",
+      "start": 24.2,
+      "end": 29,
+      "window": 4.8,
+      "estimate": 3.4,
+      "text": "이 온도에서 암석은 돌처럼 굴지 않습니다."
+    },
+    {
+      "index": 8,
+      "file": "08.wav",
+      "start": 29.2,
+      "end": 33,
+      "window": 3.8,
+      "estimate": 1.6,
+      "text": "엿처럼 늘어납니다."
+    },
+    {
+      "index": 9,
+      "file": "09.wav",
+      "start": 33.2,
+      "end": 37.5,
+      "window": 4.3,
+      "estimate": 2.4,
+      "text": "뚫은 자리가 다시 메워집니다."
+    },
+    {
+      "index": 10,
+      "file": "10.wav",
+      "start": 38.2,
+      "end": 42,
+      "window": 3.8,
+      "estimate": 2,
+      "text": "그런데 이 구멍의 지름은,"
+    },
+    {
+      "index": 11,
+      "file": "11.wav",
+      "start": 42.2,
+      "end": 46,
+      "window": 3.8,
+      "estimate": 2.6,
+      "text": "겨우 이십삼 센티미터였습니다."
+    },
+    {
+      "index": 12,
+      "file": "12.wav",
+      "start": 46.2,
+      "end": 50,
+      "window": 3.8,
+      "estimate": 2.8,
+      "text": "깊이가 지름의 오만 배가 넘습니다."
+    },
+    {
+      "index": 13,
+      "file": "13.wav",
+      "start": 50.4,
+      "end": 54.6,
+      "window": 4.2,
+      "estimate": 3.6,
+      "text": "그리고 여기는 지각의 삼분의 일 지점입니다."
+    },
+    {
+      "index": 14,
+      "file": "14.wav",
+      "start": 54.8,
+      "end": 59,
+      "window": 4.2,
+      "estimate": 2.6,
+      "text": "지구는 아직 뚫린 적이 없습니다."
+    }
+  ]
+}

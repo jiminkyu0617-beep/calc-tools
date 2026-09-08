@@ -18,8 +18,8 @@ scene.html (HTML/CSS/JS)  →  Chromium 프레임 캡처  →  ffmpeg  →  1080
    → **"영상미를 조금 고쳐서 다시 뽑는다"가 실제로 가능하다.** 피드백 루프의 전제다.
 2. **룩이 문서가 아니라 파일이다.** `theme.css`가 룩북의 구현체다.
    룩을 바꾸면 다시 렌더하는 전 회차가 같이 바뀐다. 문서와 결과물이 어긋날 수 없다.
-3. **자막을 두 번 적지 않는다.** 씬의 `captions` 배열이 원본이고,
-   `.srt`는 거기서 생성한다. 대본과 화면의 타임코드가 어긋날 수 없다.
+3. **자막과 나레이션을 두 번 적지 않는다.** 씬의 `captions`·`narration` 배열이 원본이고,
+   `.srt`와 나레이션 명세는 거기서 생성한다. 세 군데에 적으면 반드시 어긋난다.
 
 ## 설치
 
@@ -33,11 +33,24 @@ Chromium은 이 환경에 이미 설치돼 있다(`PLAYWRIGHT_BROWSERS_PATH`).
 ## 사용
 
 ```bash
-node capture.mjs 001-deepest-hole            # 프레임 PNG 시퀀스
-node build.mjs   001-deepest-hole            # 무음 MP4
-node build.mjs   001-deepest-hole vo.wav     # 나레이션 포함 (-14 LUFS 자동 정규화)
-node srt.mjs     001-deepest-hole            # 업로드용 자막
+node capture.mjs 001-deepest-hole                 # 프레임 PNG 시퀀스
+node build.mjs   001-deepest-hole                 # 무음 MP4
+node srt.mjs     001-deepest-hole                 # 업로드용 자막
+node vo.mjs      001-deepest-hole                 # 나레이션 대본 + 타임코드 명세
+node build.mjs   001-deepest-hole --vo ./vo-clips # 나레이션 클립을 타임코드에 배치
 ```
+
+### 나레이션은 줄 단위로 뽑는다
+
+`vo.mjs`가 씬의 `narration` 배열에서 `narration.txt`(TTS에 넣을 대본)와
+`narration.json`(각 줄의 시작 시각)을 만든다. 클립을 `01.wav … NN.wav`로 저장하면
+`build.mjs --vo`가 각자의 시각에 꽂고 -14 LUFS로 맞춘다.
+
+**한 통으로 뽑지 마라.** 화면 타이밍과 반드시 어긋나고, 어긋나면 화면을 다시 맞춰야 한다.
+
+`vo.mjs`는 각 줄이 자기 구간에 들어가는지도 검사한다(한국어 약 5음절/초 기준).
+001화에서 실제로 마지막 두 줄이 걸려 씬을 57초에서 59초로 늘렸다.
+**이 검사를 무시하고 렌더하면 나레이션이 다음 자막을 밟는다.**
 
 전체 렌더 전에는 **반드시 키프레임을 먼저 눈으로 본다.**
 1710프레임을 다 뽑고 나서 색이 틀린 걸 발견하면 그만큼을 버린다.
@@ -50,7 +63,8 @@ node _preview.mjs 001-deepest-hole "3.6,17.5,44,52.8"
 
 1. `scenes/<번호>-<슬러그>/scene.html` 생성
 2. `theme.css`를 링크하고 `lib/scene.js`를 import
-3. `defineScene({ duration, fps: 30, captions, render(t) })` 하나만 구현
+3. `defineScene({ duration, fps: 30, captions, narration, render(t) })` 하나만 구현
+   (`narration`은 `captions`와 **개수가 같아야 한다.** `vo.mjs`가 검사한다)
 4. 미리보기 → 비주얼 QC(`04-visual.md`) → 전체 렌더
 
 **`render(t)` 안에서 시간을 읽지 마라.** `Date.now()`, `Math.random()`, CSS transition 전부 금지다.
@@ -67,6 +81,7 @@ node _preview.mjs 001-deepest-hole "3.6,17.5,44,52.8"
 | `capture.mjs` | 프레임 캡처 |
 | `build.mjs` | ffmpeg 조립 |
 | `srt.mjs` | 자막 생성 |
+| `vo.mjs` | 나레이션 대본·타임코드 명세 생성 + 구간 여유 검사 |
 | `_preview.mjs` | 키프레임 미리보기 |
 
 ## 발행 규격

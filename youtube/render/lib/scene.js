@@ -44,11 +44,13 @@ export function reveal(el, t, from, to, { y = 40, out = null } = {}) {
 /**
  * 씬 정의. duration(초)과 render(t) 하나만 있으면 된다.
  * capture.mjs가 window.__scene을 읽어 프레임을 뽑고,
- * srt.mjs가 captions를 읽어 자막 파일을 만든다 — 자막을 손으로 두 번 적지 않는다.
+ * srt.mjs가 captions를 읽어 자막 파일을 만들고,
+ * vo.mjs가 narration을 읽어 나레이션 대본과 타임코드 명세를 만든다.
+ * 자막·나레이션·화면의 원본이 이 파일 하나다. 세 군데에 적으면 반드시 어긋난다.
  */
-export function defineScene({ duration, fps = 30, render, captions = [] }) {
+export function defineScene({ duration, fps = 30, render, captions = [], narration = [] }) {
   window.__scene = {
-    duration, fps, captions,
+    duration, fps, captions, narration,
     frames: Math.round(duration * fps),
     seek(frame) {
       render(frame / fps);

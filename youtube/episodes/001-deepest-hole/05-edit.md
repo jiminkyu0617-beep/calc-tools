@@ -7,20 +7,25 @@
 ## 렌더 명령
 ```bash
 cd youtube/render
-npm install                      # 최초 1회
-node capture.mjs 001-deepest-hole # 1710 프레임 PNG
-node build.mjs   001-deepest-hole # 무음 MP4
-node build.mjs   001-deepest-hole vo.wav   # 나레이션 포함 (-14 LUFS 자동 정규화)
+npm install                        # 최초 1회
+node vo.mjs      001-deepest-hole  # 나레이션 대본 + 타임코드 명세 (구간 여유 검사 포함)
+node srt.mjs     001-deepest-hole  # 업로드용 자막
+node capture.mjs 001-deepest-hole  # 1770 프레임 PNG
+node build.mjs   001-deepest-hole  # 무음 MP4
+node build.mjs   001-deepest-hole --vo <클립디렉터리>   # 나레이션 14줄을 타임코드에 배치
 ```
+
+**나레이션은 줄 단위로 뽑는다.** 한 통으로 뽑으면 화면 타이밍과 반드시 어긋난다.
+보이스 스펙과 워크플로는 `youtube/voice.md`.
 
 ## 산출물 규격 (실측)
 | 항목 | 값 |
 |---|---|
-| 길이 | 57.00초 |
+| 길이 | 59.00초 |
 | 해상도 | 1080×1920 |
-| 프레임레이트 | 30 fps (1710 프레임) |
+| 프레임레이트 | 30 fps (1770 프레임) |
 | 코덱 | H.264 High, yuv420p, CRF 18 |
-| 파일 크기 | 892 KB (무음) |
+| 파일 크기 | 약 0.9 MB (무음) |
 | 오디오 | 없음 — 나레이션 대기 |
 
 ## 자막
@@ -32,7 +37,7 @@ node build.mjs   001-deepest-hole vo.wav   # 나레이션 포함 (-14 LUFS 자�
 |---|---|---|---|
 | 모든 그래픽 | 자체 코드 렌더 | 자체 제작 | **완료** |
 | Pretendard | npm `pretendard` | **OFL** (재배포·임베딩 가능) | 완료 |
-| 나레이션 `vo.wav` | AI TTS, 보이스 1종 고정 | 서비스 약관 확인 필요 | **사람 필요** |
+| 나레이션 14줄 | AI TTS (타입캐스트 베이직 1순위 — `youtube/voice.md`) | 약관 확인 필요 | **사람 필요** |
 | BGM | 저음 드론 | **미확정 — 검수 조건** | **사람 필요** |
 | SFX 3종 | 카운트업 정지 / 원 열림 / 축 전환 | 미확정 | **사람 필요** |
 
