@@ -28,8 +28,10 @@ if (narration.length !== captions.length) {
   process.exit(1);
 }
 
-// 한국어를 차분히 읽는 속도를 대략 5음절/초로 잡고 여유를 점검한다.
-const SYL_PER_SEC = 5.0;
+// 한국어를 차분히 읽는 속도. 처음 5.0으로 잡았다가 실측(4.2~4.8)에 못 미쳐
+// 구간을 넘긴 줄을 통과시켰다. 보수적으로 4.3을 쓴다.
+// 이 값은 추정일 뿐이고, 최종 판정은 tts.py의 실측이 한다.
+const SYL_PER_SEC = 4.3;
 const syllables = s => (s.match(/[가-힣]/g) || []).length;
 
 const lines = narration.map((text, i) => {

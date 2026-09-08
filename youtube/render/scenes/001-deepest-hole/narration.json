@@ -7,7 +7,7 @@
       "start": 0.6,
       "end": 4,
       "window": 3.4,
-      "estimate": 1.6,
+      "estimate": 1.86,
       "text": "여기서 멈췄습니다."
     },
     {
@@ -16,7 +16,7 @@
       "start": 4.4,
       "end": 8.2,
       "window": 3.8,
-      "estimate": 2,
+      "estimate": 2.33,
       "text": "인간이 판 가장 깊은 구멍."
     },
     {
@@ -25,8 +25,8 @@
       "start": 8.4,
       "end": 12,
       "window": 3.6,
-      "estimate": 3.2,
-      "text": "십구 년을 파고, 만 이천이백육십이 미터."
+      "estimate": 3.49,
+      "text": "십구 년 만에 만 이천이백육십이 미터."
     },
     {
       "index": 4,
@@ -34,7 +34,7 @@
       "start": 12.4,
       "end": 16,
       "window": 3.6,
-      "estimate": 3,
+      "estimate": 3.49,
       "text": "멈춘 이유는 장비만이 아니었습니다."
     },
     {
@@ -43,7 +43,7 @@
       "start": 16.2,
       "end": 20,
       "window": 3.8,
-      "estimate": 2.6,
+      "estimate": 3.02,
       "text": "바닥 온도가 백팔십 도였습니다."
     },
     {
@@ -52,7 +52,7 @@
       "start": 20.2,
       "end": 24,
       "window": 3.8,
-      "estimate": 1.8,
+      "estimate": 2.09,
       "text": "예상은 백 도였습니다."
     },
     {
@@ -61,7 +61,7 @@
       "start": 24.2,
       "end": 29,
       "window": 4.8,
-      "estimate": 3.4,
+      "estimate": 3.95,
       "text": "이 온도에서 암석은 돌처럼 굴지 않습니다."
     },
     {
@@ -70,7 +70,7 @@
       "start": 29.2,
       "end": 33,
       "window": 3.8,
-      "estimate": 1.6,
+      "estimate": 1.86,
       "text": "엿처럼 늘어납니다."
     },
     {
@@ -79,7 +79,7 @@
       "start": 33.2,
       "end": 37.5,
       "window": 4.3,
-      "estimate": 2.4,
+      "estimate": 2.79,
       "text": "뚫은 자리가 다시 메워집니다."
     },
     {
@@ -88,7 +88,7 @@
       "start": 38.2,
       "end": 42,
       "window": 3.8,
-      "estimate": 2,
+      "estimate": 2.33,
       "text": "그런데 이 구멍의 지름은,"
     },
     {
@@ -97,7 +97,7 @@
       "start": 42.2,
       "end": 46,
       "window": 3.8,
-      "estimate": 2.6,
+      "estimate": 3.02,
       "text": "겨우 이십삼 센티미터였습니다."
     },
     {
@@ -106,7 +106,7 @@
       "start": 46.2,
       "end": 50,
       "window": 3.8,
-      "estimate": 2.8,
+      "estimate": 3.26,
       "text": "깊이가 지름의 오만 배가 넘습니다."
     },
     {
@@ -115,7 +115,7 @@
       "start": 50.4,
       "end": 54.6,
       "window": 4.2,
-      "estimate": 3.6,
+      "estimate": 4.19,
       "text": "그리고 여기는 지각의 삼분의 일 지점입니다."
     },
     {
@@ -124,7 +124,7 @@
       "start": 54.8,
       "end": 59,
       "window": 4.2,
-      "estimate": 2.6,
+      "estimate": 3.02,
       "text": "지구는 아직 뚫린 적이 없습니다."
     }
   ],
