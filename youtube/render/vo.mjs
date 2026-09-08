@@ -16,8 +16,9 @@ const { port, close } = await serve(root);
 const browser = await chromium.launch({ executablePath: chromePath() });
 const page = await browser.newPage();
 await page.goto(`http://127.0.0.1:${port}/scenes/${name}/scene.html`, { waitUntil: 'networkidle' });
-const { captions = [], narration = [] } = await page.evaluate(() => ({
+const { captions = [], narration = [], sfx = [] } = await page.evaluate(() => ({
   captions: window.__scene?.captions ?? [], narration: window.__scene?.narration ?? [],
+  sfx: window.__scene?.sfx ?? [],
 }));
 await browser.close(); close();
 
@@ -40,12 +41,14 @@ const lines = narration.map((text, i) => {
 
 const outDir = resolve(root, 'scenes', name);
 mkdirSync(outDir, { recursive: true });
-writeFileSync(resolve(outDir, 'narration.json'), JSON.stringify({ scene: name, lines }, null, 2), 'utf8');
+const cues = sfx.map(([time, sound]) => ({ time, file: `${sound}.wav` }));
+writeFileSync(resolve(outDir, 'narration.json'),
+  JSON.stringify({ scene: name, lines, sfx: cues }, null, 2), 'utf8');
 writeFileSync(resolve(outDir, 'narration.txt'),
   lines.map(l => `${l.file}\t${l.text}`).join('\n') + '\n', 'utf8');
 
 const tight = lines.filter(l => l.estimate > l.window - 0.3);
-console.log(`나레이션 ${lines.length}줄 → scenes/${name}/narration.json, narration.txt`);
+console.log(`나레이션 ${lines.length}줄 · 효과음 ${cues.length}개 → scenes/${name}/narration.json, narration.txt`);
 console.table(lines.map(({ file, start, window, estimate, text }) => ({ file, start, window, estimate, text })));
 if (tight.length) {
   console.warn(`\n주의: 구간이 빠듯한 줄 ${tight.length}개 — 문장을 줄이거나 씬 길이를 늘려라.`);

@@ -121,6 +121,8 @@ defineScene({
   fps: 30,
   captions: CAPTIONS,
   narration: NARRATION,
+  // 효과음은 세 번뿐이다. 룩북 규칙: 의미 있는 순간에만.
+  sfx: [[3.40, 'lock'], [42.40, 'open'], [50.40, 'shift']],
   render(t) {
     // ── S1 (0–4) 후킹: 결과 숫자가 먼저 나온다
     num.textContent = counter(t, 0, DEPTH, 0.3, 3.4);

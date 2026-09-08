@@ -24,6 +24,9 @@ mkdirSync(dirname(outFile), { recursive: true });
 
 // 발행 규격: 1080×1920 / 30fps / H.264 CRF 18 / yuv420p / AAC 192k / -14 LUFS
 const LOUDNORM = 'loudnorm=I=-14:TP=-1.5:LRA=11';
+// 오디오를 무음으로 연장해 영상 끝까지 채운다. 이게 없으면 -shortest가 영상을 잘라낸다.
+// loudnorm이 샘플레이트를 바꿔 놓기도 하므로 48kHz로 되돌린다.
+const PAD = 'apad,aresample=48000';
 const args = ['-y', '-framerate', '30', '-i', `${frames}/%05d.png`];
 let mode = '무음';
 
@@ -31,26 +34,43 @@ if (a1 === '--vo') {
   const voDir = resolve(a2 ?? '');
   const spec = resolve(root, 'scenes', name, 'narration.json');
   if (!existsSync(spec)) { console.error(`나레이션 명세가 없습니다. 먼저: node vo.mjs ${name}`); process.exit(1); }
-  const { lines } = JSON.parse(readFileSync(spec, 'utf8'));
+  const { lines, sfx = [] } = JSON.parse(readFileSync(spec, 'utf8'));
 
   const present = lines.filter(l => existsSync(resolve(voDir, l.file)));
   const missing = lines.filter(l => !existsSync(resolve(voDir, l.file)));
-  if (!present.length) { console.error(`${voDir} 에 클립이 하나도 없습니다.`); process.exit(1); }
-  if (missing.length) console.warn(`경고: 클립 없음 ${missing.map(l => l.file).join(', ')} — 그 구간은 무음이 됩니다.`);
 
+  // 효과음은 채널 공용 자산이다 — 회차마다 다른 소리를 쓰면 채널이 안 쌓인다
+  const sfxDir = resolve(root, 'sfx');
+  const cues = sfx.filter(c => existsSync(resolve(sfxDir, c.file)));
+
+  // 나레이션이 아직 없어도 효과음만으로 굽을 수 있어야 한다.
+  // 그래야 목소리를 받기 전에 오디오 경로가 도는지 검증할 수 있다.
+  if (!present.length && !cues.length) {
+    console.error(`${voDir} 에 나레이션 클립이 없고 효과음 큐도 없습니다.`);
+    process.exit(1);
+  }
+  if (!present.length) console.warn('나레이션 클립이 없습니다 — 효과음만 얹습니다.');
+  else if (missing.length) console.warn(`경고: 클립 없음 ${missing.map(l => l.file).join(', ')} — 그 구간은 무음이 됩니다.`);
   present.forEach(l => args.push('-i', resolve(voDir, l.file)));
+  cues.forEach(c => args.push('-i', resolve(sfxDir, c.file)));
   // 각 클립을 자기 시작 시각으로 지연시킨 뒤 합친다. normalize=0이라야 레벨이 죽지 않는다.
-  const delays = present.map((l, i) => {
-    const ms = Math.round(l.start * 1000);
+  const tracks = [
+    ...present.map(l => l.start),
+    ...cues.map(c => c.time),
+  ];
+  const delays = tracks.map((start, i) => {
+    const ms = Math.round(start * 1000);
     return `[${i + 1}:a]adelay=${ms}|${ms}[d${i}]`;
   });
-  const chain = `${delays.join(';')};${present.map((_, i) => `[d${i}]`).join('')}` +
-                `amix=inputs=${present.length}:normalize=0:dropout_transition=0[m];[m]${LOUDNORM}[ao]`;
+  const chain = `${delays.join(';')};${tracks.map((_, i) => `[d${i}]`).join('')}` +
+                `amix=inputs=${tracks.length}:normalize=0:dropout_transition=0[m];` +
+                `[m]${LOUDNORM},${PAD}[ao]`;
   args.push('-filter_complex', chain, '-map', '0:v', '-map', '[ao]',
-            '-c:a', 'aac', '-b:a', '192k', '-shortest');
-  mode = `나레이션 ${present.length}/${lines.length}줄 배치`;
+            '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest');
+  mode = `나레이션 ${present.length}/${lines.length}줄 + 효과음 ${cues.length}개 배치`;
 } else if (a1) {
-  args.push('-i', resolve(a1), '-af', LOUDNORM, '-c:a', 'aac', '-b:a', '192k', '-shortest');
+  args.push('-i', resolve(a1), '-af', `${LOUDNORM},${PAD}`,
+            '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest');
   mode = '단일 오디오 트랙';
 }
 

@@ -127,5 +127,19 @@
       "estimate": 2.6,
       "text": "지구는 아직 뚫린 적이 없습니다."
     }
+  ],
+  "sfx": [
+    {
+      "time": 3.4,
+      "file": "lock.wav"
+    },
+    {
+      "time": 42.4,
+      "file": "open.wav"
+    },
+    {
+      "time": 50.4,
+      "file": "shift.wav"
+    }
   ]
 }

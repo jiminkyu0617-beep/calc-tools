@@ -24,6 +24,8 @@
 4. `youtube/voice.md` — 나레이션 보이스 (한 번 정하면 바꾸지 않는다)
 5. `youtube/sourcing.md` — 출처 등급과 어느 주장에 어느 등급이 필요한지
 
+브랜드 자산(프로필·배너·효과음)도 전부 코드로 만든다 → [`youtube/brand.md`](brand.md).
+
 **업로드는 사람이 한다.** 이 세션에 유튜브 게시 도구는 없다.
 무엇을 넘겨야 하고 무엇을 받아와야 하는지는 [`youtube/upload-checklist.md`](upload-checklist.md).
 
