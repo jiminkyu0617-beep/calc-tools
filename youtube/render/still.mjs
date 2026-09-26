@@ -24,7 +24,7 @@ const out = resolve(outDir, `${name.split('/').pop()}.png`);
 const { port, close } = await serve(root);
 const browser = await chromium.launch({
   executablePath: chromePath(),
-  args: ['--force-color-profile=srgb', '--font-render-hinting=none'],
+  args: ['--force-color-profile=srgb', '--font-render-hinting=none', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 const page = await browser.newPage({ viewport: { width: +w, height: +h }, deviceScaleFactor: 1 });
 const errs = [];

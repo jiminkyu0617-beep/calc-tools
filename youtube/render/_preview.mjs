@@ -10,7 +10,7 @@ const name = process.argv[2];
 const times = (process.argv[3] || '1.8,3.6,9,17.5,22,27,41.5,53.5').split(',').map(Number);
 const out = resolve(root, 'out', name, 'preview'); mkdirSync(out, { recursive: true });
 const { port, close } = await serve(root);
-const b = await chromium.launch({ executablePath: chromePath() });
+const b = await chromium.launch({ executablePath: chromePath(), args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
 const errs = []; p.on('pageerror', e => errs.push(String(e)));
 p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });

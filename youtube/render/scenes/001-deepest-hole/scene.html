@@ -29,13 +29,10 @@
 </style>
 
 <div class="stage">
+  <canvas id="bg" style="position:absolute;left:0;top:0;width:1080px;height:1920px"></canvas>
   <div class="ruler" id="ruler"><div class="ruler-fill" id="rfill"></div><div class="ruler-hot" id="rhot"></div><div class="ruler-head" id="rhead"></div></div>
   <div class="rest-label" id="restLabel">뚫지 못한 3분의 2</div>
 
-  <svg id="section" viewBox="0 0 1080 1920">
-    <path id="wallL" fill="#1A2029" stroke="var(--accent-dim)" stroke-width="5"/>
-    <path id="wallR" fill="#1A2029" stroke="var(--accent-dim)" stroke-width="5"/>
-  </svg>
   <div class="sec-label" id="secLabel">지하 약 12km 단면 · <b>180°C</b></div>
   <div id="ticks"></div>
   <div class="head-label" id="headLabel">12,262 m</div>
@@ -61,30 +58,23 @@
 
 <script type="module">
 import { defineScene, seq, ease, lerp, counter, $ } from '../../lib/scene.js';
+import { createShaderLayer } from '../../lib/gl.js';
+
+// 움직이는 배경: 지층·지열·녹은 암벽·구멍 속 터널 (earth.frag)
+const bg = createShaderLayer($('#bg'), await (await fetch('./earth.frag')).text());
 
 const num=$('#num'), unit=$('#unit'), numWrap=$('#numWrap'), cap=$('#cap');
 const ruler=$('#ruler'), rfill=$('#rfill'), rhead=$('#rhead'), ticks=$('#ticks'), headLabel=$('#headLabel');
 const temp=$('#temp'), barExp=$('#barExp'), barAct=$('#barAct'), labExp=$('#labExp'), labAct=$('#labAct');
 const twistGroup=$('#twistGroup'), twist=$('#twist'), twistNum=$('#twistNum'), circle=$('#circle'), ctick=$('#ctick');
 const rhot=$('#rhot'), restLabel=$('#restLabel');
-const section=$('#section'), wallL=$('#wallL'), wallR=$('#wallR'), secLabel=$('#secLabel');
+const secLabel=$('#secLabel');
 
 // 색 보간 — 축 전환 때 눈금자 바탕을 밝힌다
 const hex = h => [1,3,5].map(i => parseInt(h.slice(i, i + 2), 16));
 const mix = (a, b, p) => { const A = hex(a), B = hex(b);
   return '#' + A.map((v, i) => Math.round(lerp(v, B[i], p)).toString(16).padStart(2, '0')).join(''); };
 
-// 단면: 가운데 틈이 구멍이다. bulge만큼 벽의 가운데가 안으로 흘러든다.
-const SEC = { top: 560, bot: 1290, cx: 540, gap: 200, outer: 300 };
-function wallPath(side, bulge) {
-  const { top, bot, cx, gap, outer } = SEC, mid = (top + bot) / 2;
-  const edge = cx + side * gap / 2;            // 원래 벽면
-  const out  = cx + side * (gap / 2 + outer);  // 바깥쪽 끝
-  const pull = edge - side * bulge;            // 가운데가 안으로 들어온 위치
-  // 위·아래는 원래 벽면에 고정되고, 가운데만 흘러든다 — 열을 가장 많이 받는 깊은 곳
-  return `M ${out} ${top} L ${edge} ${top} C ${edge} ${mid - 120}, ${pull} ${mid - 160}, ${pull} ${mid} ` +
-         `C ${pull} ${mid + 160}, ${edge} ${mid + 120}, ${edge} ${bot} L ${out} ${bot} Z`;
-}
 
 const RULER_TOP = 300, RULER_LEN = 1000, DEPTH = 12262;
 
@@ -230,12 +220,9 @@ defineScene({
     const secIn = ease.out(seq(t, 29.2, 30.0));
     const secOut = ease.out(seq(t, 37.0, 37.8));
     const secO = Math.min(secIn, 1 - secOut);
-    section.style.opacity = secO;
     secLabel.style.opacity = secO;
     const bulge = lerp(0, 58, ease.inOut(seq(t, 29.8, 33.0)))       // 엿처럼 늘어난다
                 + lerp(0, 38, ease.inOut(seq(t, 33.4, 36.8)));      // 다시 메워진다 (틈 ≈ 8px)
-    wallL.setAttribute('d', wallPath(-1, bulge));
-    wallR.setAttribute('d', wallPath(+1, bulge));
 
     // ── ③ 지각 구간: 뚫은 1/3은 강조, 뚫지 못한 2/3을 말로 짚는다
     ruler.style.background = mix('#232B35', '#465363', crust);
@@ -245,6 +232,25 @@ defineScene({
     restLabel.style.opacity = ease.out(seq(t, 52.6, 53.6));
     restLabel.style.top = (RULER_TOP + RULER_LEN * (2 / 3) - 20) + 'px';
     restLabel.style.transform = ruler.style.transform;
+
+    // ── 배경 셰이더: 장면마다 세기를 바꾼다. 숫자·자막이 늘 먼저 읽혀야 한다
+    const strata =
+        lerp(0.32, 0.62, ease.inOut(seq(t, 4.2, 5.4)))        // 후킹은 옅게, 하강 구간은 진하게
+      - 0.28 * ease.inOut(seq(t, 12.6, 14.2))                  // 온도 막대가 읽히게 물린다
+      - 0.34 * ease.out(seq(t, 29.0, 29.8))                    // 단면 구간은 암벽이 주인공
+      + 0.22 * ease.out(seq(t, 37.4, 38.4))                    // 반전 구간
+      + 0.20 * ease.inOut(seq(t, 50.0, 51.5));                 // 지각 구간
+    const heat = ease.inOut(seq(t, 10.5, 16.5)) * (1 - 0.6 * ease.out(seq(t, 38.0, 40.0)));
+    bg.draw({
+      uT: t,
+      uStrata: Math.max(0, strata),
+      uDescent: 1.3 * ease.inOut(seq(t, 4.8, 11.5)),         // 눈금자와 함께 내려간다
+      uHeat: heat,
+      uWall: secO,
+      uBulge: bulge,
+      uTunnel: Math.min(twIn, 1 - twOut),
+      uTunnelR: Math.max(0, D / 2 - 4),
+    });
 
     setCaption(t);
   },

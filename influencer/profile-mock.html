@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family:'Pretendard'; font-weight:400; src:url('../youtube/render/node_modules/pretendard/dist/public/static/Pretendard-Regular.otf'); }
+  @font-face { font-family:'Pretendard'; font-weight:600; src:url('../youtube/render/node_modules/pretendard/dist/public/static/Pretendard-SemiBold.otf'); }
+  @font-face { font-family:'Pretendard'; font-weight:800; src:url('../youtube/render/node_modules/pretendard/dist/public/static/Pretendard-ExtraBold.otf'); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { width:1290px; font-family:'Pretendard',sans-serif; background:#E9ECEF; padding:40px; display:flex; gap:30px; }
+  .phone { width:390px; background:#fff; border-radius:28px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+  .top { padding:18px 16px 10px; font-weight:800; font-size:17px; display:flex; justify-content:space-between; }
+  .head { display:flex; align-items:center; gap:18px; padding:4px 16px 10px; }
+  .avatar { width:84px; height:84px; border-radius:50%; flex:none; display:grid; place-items:center;
+            font-size:30px; font-weight:800; color:#fff; }
+  .stats { display:flex; gap:18px; font-size:12px; color:#555; text-align:center; }
+  .stats b { display:block; font-size:16px; color:#111; }
+  .name { padding:0 16px; font-weight:800; font-size:14px; }
+  .ailabel { display:inline-block; margin:6px 16px 0; font-size:11px; font-weight:600; color:#555; background:#F1F3F5;
+             border-radius:6px; padding:3px 8px; }
+  .bio { padding:6px 16px 0; font-size:13px; line-height:1.5; white-space:pre-line; color:#222; }
+  .link { padding:4px 16px 10px; font-size:13px; font-weight:600; color:#1B5FC1; }
+  .hl { display:flex; gap:14px; padding:6px 16px 12px; }
+  .hl div { text-align:center; font-size:11px; color:#333; }
+  .hl i { display:block; width:56px; height:56px; border-radius:50%; border:1.5px solid #DDD; margin-bottom:4px;
+          display:grid; place-items:center; font-style:normal; font-size:18px; font-weight:800; color:#999; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
+  .cell { aspect-ratio:9/16; position:relative; display:flex; align-items:flex-end; padding:8px; color:#fff;
+          font-weight:800; font-size:13px; line-height:1.25; letter-spacing:-.02em; }
+  .cell::after { content:'▶'; position:absolute; left:8px; top:8px; font-size:10px; opacity:.8; }
+</style>
+<div id="root" style="display:contents"></div>
+<script>
+const P = [
+  { user:'harin.30days', name:'하린 · 30일 지출 기록', init:'하', c1:'#2B3A4A', c2:'#E8563A',
+    bio:'AI로 만든 가상 인물 하린이에요 🤖\n월급날 다음 날부터 30일, 쓴 돈을 전부 적어요.\n📒 30일 지출 리셋 워크북 ↓', link:'워크북 보러 가기',
+    hl:['30일','영수증','결산','워크북'],
+    covers:['D-30\n오늘 쓴 돈 0원','오늘 12,400원\n커피가 절반','안 보는 구독 3개\n= 월 27,700원','도시락 4,200원\n사먹기 11,000원','무지출 3일째\n오늘 무너짐','월급 300만 원\n4대보험 29만 원','장바구니\n48,000 → 19,000','텀블러 300원\n× 20일','1주차 총 지출\n187,300원'] },
+  { user:'doyun.5min', name:'도윤 · 퇴근 후 5분', init:'도', c1:'#23332B', c2:'#6FBF73',
+    bio:'AI로 만든 가상 인물 도윤입니다 🤖\n퇴근 후 딱 5분. 30일 버티는 기록.\n※ 의학적 조언이 아닙니다', link:'5분 루틴 체크북',
+    hl:['D-30','새벽','사무실','체크'],
+    covers:['D-30\n5분만','오늘은\n벽 짚고 종아리','오전 6:10\n10분 걷기','회의 3개 사이\n1분','4일째\n누워만 있었다','물 8잔 도전\n5잔에서 멈춤','밤 11시\n휴대폰 끄기','7층\n계단 선택','9일 연속\n제일 길었다'] },
+  { user:'sea.talklog', name:'세아 · 대화 일기', init:'세', c1:'#3A2B35', c2:'#E7A6B8',
+    bio:'AI로 만든 가상 인물 세아야 🤖\n30일 동안 내 말버릇을 적어봐.\n오늘 보낸 메시지, 다시 보면 어때?', link:'30일 대화 일기',
+    hl:['답장','단답','먼저','일기'],
+    covers:['D-30\n답장 미룬 메시지 7개','"ㅇㅋ" 대신\n한 문장 더','전화 vs 문자','오늘 먼저\n말 건 사람 1명','읽씹이\n무서운 이유','"미안해"를\n"고마워"로','목소리로\n보내본 날','연락 끊긴 친구에게\n먼저','1주차\n내 말버릇 3개'] },
+];
+document.getElementById('root').innerHTML = P.map(p => `<div class="phone">
+  <div class="top"><span>${p.user}</span><span>≡</span></div>
+  <div class="head"><div class="avatar" style="background:linear-gradient(135deg,${p.c1},${p.c2})">${p.init}</div>
+    <div class="stats"><div><b>10</b>게시물</div><div><b>0</b>팔로워</div><div><b>0</b>팔로잉</div></div></div>
+  <div class="name">${p.name}</div>
+  <div class="ailabel">🤖 AI 생성 인물</div>
+  <div class="bio">${p.bio}</div>
+  <div class="link">🔗 ${p.link}</div>
+  <div class="hl">${p.hl.map(h => `<div><i>${h[0]}</i>${h}</div>`).join('')}</div>
+  <div class="grid">${p.covers.map((c, i) => `<div class="cell" style="background:linear-gradient(${160 + i*9}deg,${p.c1},${p.c1} 55%,${p.c2})">${c.replace(/\n/g,'<br>')}</div>`).join('')}</div>
+</div>`).join('');
+</script>

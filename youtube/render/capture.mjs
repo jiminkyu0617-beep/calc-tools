@@ -22,7 +22,8 @@ const { port, close } = await serve(root);   // file://에서는 모듈 스크�
 
 const browser = await chromium.launch({
   executablePath: chromePath(),
-  args: ['--force-color-profile=srgb', '--disable-lcd-text', '--font-render-hinting=none'],
+  args: ['--force-color-profile=srgb', '--disable-lcd-text', '--font-render-hinting=none',
+         '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],   // 셰이더 배경: CPU WebGL
 });
 const page = await browser.newPage({
   viewport: { width: 1080, height: 1920 },
