@@ -37,7 +37,8 @@ node capture.mjs 001-deepest-hole                 # 프레임 PNG 시퀀스
 node build.mjs   001-deepest-hole                 # 무음 MP4
 node srt.mjs     001-deepest-hole                 # 업로드용 자막
 node vo.mjs      001-deepest-hole                 # 나레이션 대본 + 타임코드 명세
-node build.mjs   001-deepest-hole --vo ./vo-clips # 나레이션 클립을 타임코드에 배치
+python3 tts_supertonic.py 001-deepest-hole        # 나레이션 생성 (기록된 seed로 재현)
+node build.mjs   001-deepest-hole --vo out/001-deepest-hole/vo --bgm   # 완성본
 ```
 
 ### 나레이션은 줄 단위로 뽑는다
@@ -82,6 +83,8 @@ node _preview.mjs 001-deepest-hole "3.6,17.5,44,52.8"
 | `build.mjs` | ffmpeg 조립 |
 | `srt.mjs` | 자막 생성 |
 | `vo.mjs` | 나레이션 대본·타임코드 명세 생성 + 구간 여유 검사 |
+| `tts_supertonic.py` | 나레이션 생성 (Supertonic 3) + 한국어 음성 인식으로 되받아 적어 검수 |
+| `fetch-models.sh` | 모델 받기 (sherpa-onnx 공식 GitHub 릴리스, 체크섬 확인) |
 | `_preview.mjs` | 키프레임 미리보기 |
 | `still.mjs` | 정지 이미지(프로필·배너) 렌더 |
 | `sfx.mjs` | 효과음 합성 (외부 소스 없음, 피크 -18 dBFS 자동 정렬) |

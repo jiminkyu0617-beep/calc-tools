@@ -17,10 +17,26 @@
   /* 지름 23cm 원 — 숫자만으로는 '작다'가 안 느껴진다. 형태를 같이 보여준다. */
   .circle { position:absolute; left:50%; border:5px solid var(--text); border-radius:50%; }
   .circle-tick { position:absolute; left:50%; height:2px; background:var(--muted); }
+  /* 구멍 단면 — "엿처럼 늘어나 메워진다"를 형태로 보여준다.
+     CSS로 암석의 소성 거동 자체는 못 그리지만, 벽이 안으로 흘러드는 결과는 그릴 수 있다 */
+  #section { position:absolute; left:0; top:0; width:1080px; height:1920px; }
+  .sec-label { position:absolute; left:240px; top:470px; font-size:var(--fs-label);
+               font-weight:700; color:var(--muted); white-space:nowrap; }
+  .sec-label b { color:var(--accent); font-weight:800; }
+  .rest-label { position:absolute; left:150px; font-size:var(--fs-label); font-weight:700;
+                color:var(--text); white-space:nowrap; }
+  .ruler-hot { position:absolute; left:0; top:0; width:6px; background:var(--accent); }
 </style>
 
 <div class="stage">
-  <div class="ruler" id="ruler"><div class="ruler-fill" id="rfill"></div><div class="ruler-head" id="rhead"></div></div>
+  <div class="ruler" id="ruler"><div class="ruler-fill" id="rfill"></div><div class="ruler-hot" id="rhot"></div><div class="ruler-head" id="rhead"></div></div>
+  <div class="rest-label" id="restLabel">뚫지 못한 3분의 2</div>
+
+  <svg id="section" viewBox="0 0 1080 1920">
+    <path id="wallL" fill="#1A2029" stroke="var(--accent-dim)" stroke-width="5"/>
+    <path id="wallR" fill="#1A2029" stroke="var(--accent-dim)" stroke-width="5"/>
+  </svg>
+  <div class="sec-label" id="secLabel">지하 약 12km 단면 · <b>180°C</b></div>
   <div id="ticks"></div>
   <div class="head-label" id="headLabel">12,262 m</div>
 
@@ -50,6 +66,25 @@ const num=$('#num'), unit=$('#unit'), numWrap=$('#numWrap'), cap=$('#cap');
 const ruler=$('#ruler'), rfill=$('#rfill'), rhead=$('#rhead'), ticks=$('#ticks'), headLabel=$('#headLabel');
 const temp=$('#temp'), barExp=$('#barExp'), barAct=$('#barAct'), labExp=$('#labExp'), labAct=$('#labAct');
 const twistGroup=$('#twistGroup'), twist=$('#twist'), twistNum=$('#twistNum'), circle=$('#circle'), ctick=$('#ctick');
+const rhot=$('#rhot'), restLabel=$('#restLabel');
+const section=$('#section'), wallL=$('#wallL'), wallR=$('#wallR'), secLabel=$('#secLabel');
+
+// 색 보간 — 축 전환 때 눈금자 바탕을 밝힌다
+const hex = h => [1,3,5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, p) => { const A = hex(a), B = hex(b);
+  return '#' + A.map((v, i) => Math.round(lerp(v, B[i], p)).toString(16).padStart(2, '0')).join(''); };
+
+// 단면: 가운데 틈이 구멍이다. bulge만큼 벽의 가운데가 안으로 흘러든다.
+const SEC = { top: 560, bot: 1290, cx: 540, gap: 200, outer: 300 };
+function wallPath(side, bulge) {
+  const { top, bot, cx, gap, outer } = SEC, mid = (top + bot) / 2;
+  const edge = cx + side * gap / 2;            // 원래 벽면
+  const out  = cx + side * (gap / 2 + outer);  // 바깥쪽 끝
+  const pull = edge - side * bulge;            // 가운데가 안으로 들어온 위치
+  // 위·아래는 원래 벽면에 고정되고, 가운데만 흘러든다 — 열을 가장 많이 받는 깊은 곳
+  return `M ${out} ${top} L ${edge} ${top} C ${edge} ${mid - 120}, ${pull} ${mid - 160}, ${pull} ${mid} ` +
+         `C ${pull} ${mid + 160}, ${edge} ${mid + 120}, ${edge} ${bot} L ${out} ${bot} Z`;
+}
 
 const RULER_TOP = 300, RULER_LEN = 1000, DEPTH = 12262;
 
@@ -92,8 +127,10 @@ const CAPTIONS = [
 // 숫자를 소리 나는 대로 적는다. TTS가 "12,262"를 제멋대로 읽게 두지 않는다.
 const NARRATION = [
   '여기서 멈췄습니다.',
-  '인간이 판 가장 깊은 구멍.',
-  '십구 년 만에 만 이천이백육십이 미터.',
+  '인간이 판, 가장 깊은 구멍.',
+  // '만 이천이백육십이'는 이 목소리가 끝의 '이'를 미터에 삼켜 12,260으로 들린다(인식 검증).
+  // 정확한 숫자는 화면에 영상 내내 떠 있다. 나레이션은 발음이 확실하고 참인 말로 한다.
+  '십구 년 만에, 십이 킬로미터가 넘는 깊이.',
   '멈춘 이유는 장비만이 아니었습니다.',
   '바닥 온도가 백팔십 도였습니다.',
   '예상은 백 도였습니다.',
@@ -135,7 +172,7 @@ defineScene({
     // ── S2 (4.4–12) 눈금자가 내려간다
     const dig = ease.inOut(seq(t, 4.8, 11.5));
     const rulerIn = ease.out(seq(t, 4.4, 5.4));
-    const hideRuler = ease.out(seq(t, 37.8, 38.6));   // 반전 구간에서 잠시 비운다
+    const hideRuler = ease.out(seq(t, 29.0, 29.8));   // 단면·반전 구간 동안 비운다
     const backRuler = ease.out(seq(t, 50.0, 51.0));   // 지각 구간에서 되돌아온다
     const crust = ease.inOut(seq(t, 50.4, 52.4));     // 축이 깊이 → 지각으로 바뀐다
 
@@ -178,12 +215,36 @@ defineScene({
     const twIn = ease.out(seq(t, 39.6, 40.6));
     const twOut = ease.out(seq(t, 49.4, 50.2));
     twistGroup.style.opacity = Math.min(twIn, 1 - twOut);
-    twistNum.textContent = counter(t, 0, 23, 42.2, 43.4);
+    // 카운트업 전에 0을 보여주면 "지름 0cm"라는 틀린 정보가 된다. 답이 나오기 전은 ?다.
+    const asked = t < 42.2;
+    twistNum.textContent = asked ? '?' : counter(t, 0, 23, 42.2, 43.4);
+    twistNum.style.color = asked ? 'var(--muted)' : '';
     twist.style.top = '1180px';
     const D = lerp(0, 300, ease.out(seq(t, 42.4, 44.0)));   // 원이 열린다
     circle.style.cssText += `;width:${D}px;height:${D}px;top:${820 + (300 - D) / 2}px;margin-left:${-D / 2}px`;
+    circle.style.opacity = D < 4 ? 0 : 1;   // 지름 0일 때 테두리가 점으로 남는다
     ctick.style.cssText += `;width:${D}px;top:${820 + 150}px;margin-left:${-D / 2}px`;
     ctick.style.opacity = seq(t, 43.4, 44.2) * 0.5;
+
+    // ── S4 (29–38) 단면: 벽이 안으로 흘러 구멍이 메워진다
+    const secIn = ease.out(seq(t, 29.2, 30.0));
+    const secOut = ease.out(seq(t, 37.0, 37.8));
+    const secO = Math.min(secIn, 1 - secOut);
+    section.style.opacity = secO;
+    secLabel.style.opacity = secO;
+    const bulge = lerp(0, 58, ease.inOut(seq(t, 29.8, 33.0)))       // 엿처럼 늘어난다
+                + lerp(0, 38, ease.inOut(seq(t, 33.4, 36.8)));      // 다시 메워진다 (틈 ≈ 8px)
+    wallL.setAttribute('d', wallPath(-1, bulge));
+    wallR.setAttribute('d', wallPath(+1, bulge));
+
+    // ── ③ 지각 구간: 뚫은 1/3은 강조, 뚫지 못한 2/3을 말로 짚는다
+    ruler.style.background = mix('#232B35', '#465363', crust);
+    rhot.style.height = RULER_LEN * headP + 'px';
+    rhot.style.opacity = crust;
+    crustEls.forEach(el => { el.style.opacity = crust; });
+    restLabel.style.opacity = ease.out(seq(t, 52.6, 53.6));
+    restLabel.style.top = (RULER_TOP + RULER_LEN * (2 / 3) - 20) + 'px';
+    restLabel.style.transform = ruler.style.transform;
 
     setCaption(t);
   },
