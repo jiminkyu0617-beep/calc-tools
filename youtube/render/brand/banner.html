@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  /* 2560×1440로 올린다. 기기마다 보이는 범위가 다르고, 출처마다 안전 영역 수치가
+     1235×338과 1546×423으로 갈린다. 그래서 핵심 요소는 더 작은 쪽(1235×338) 안에만 둔다.
+     어느 쪽이 맞든 잘리지 않는다. */
+  html, body { width: 2560px; height: 1440px; }
+  .safe {
+    position: absolute; left: 50%; top: 50%;
+    width: 1235px; height: 338px; margin-left: -617px; margin-top: -169px;
+    display: flex; align-items: center; justify-content: center; gap: 64px;
+  }
+  .ruler { position: relative; width: 26px; height: 300px; background: var(--grid); border-radius: 13px; flex: none; }
+  .head  { position: absolute; left: 50%; top: 33.3%; width: 74px; height: 74px;
+           margin-left: -37px; margin-top: -37px; border-radius: 50%; background: var(--accent); }
+  .name  { font-size: 152px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; }
+  .tag   { font-size: 46px; font-weight: 600; color: var(--muted); margin-top: 26px; letter-spacing: -0.02em; }
+  .meta  { font-size: 32px; font-weight: 600; color: var(--muted); opacity: .75; margin-top: 30px; letter-spacing: 0.02em; }
+</style>
+<div class="stage" style="width:2560px;height:1440px">
+  <div class="safe">
+    <div class="ruler"><div class="head"></div></div>
+    <div>
+      <div class="name">한계선</div>
+      <div class="tag">어디까지 갔고, 왜 거기서 멈췄나</div>
+      <div class="meta">쇼츠 · 주 2~3편</div>
+    </div>
+  </div>
+</div>
