@@ -24,6 +24,7 @@
 4. `youtube/voice.md` — 나레이션 보이스 (한 번 정하면 바꾸지 않는다)
 5. `youtube/sourcing.md` — 출처 등급과 어느 주장에 어느 등급이 필요한지
 6. `youtube/generative-policy.md` — 생성 AI를 어디에 쓰고 어디에 안 쓰는지
+7. `youtube/open-source-stack.md` — 무료로 쓸 수 있는 공개 모델과 라이선스 함정, 유튜브 비진정성 정책
 
 브랜드 자산(프로필·배너·효과음)도 전부 코드로 만든다 → [`youtube/brand.md`](brand.md).
 
