@@ -9,7 +9,7 @@
    어긋나면 화면을 다시 맞춰야 한다. 클립을 시각에 꽂으면 그럴 일이 없다. */
 import ffmpeg from 'ffmpeg-static';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, mkdirSync, copyFileSync } from 'node:fs';
+import { existsSync, readFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,6 +23,8 @@ const frames = resolve(root, 'out', name, 'frames');
 if (!existsSync(frames)) { console.error(`프레임이 없습니다. 먼저 capture를 돌리세요: ${frames}`); process.exit(1); }
 
 const outFile = resolve(root, 'out', name, `${name}.mp4`);
+// 오디오를 영상 길이에 정확히 맞추기 위해 프레임 수로 길이를 잰다
+const DURATION = readdirSync(frames).filter(f => f.endsWith('.png')).length / 30;
 mkdirSync(dirname(outFile), { recursive: true });
 
 // 발행 규격: 1080×1920 / 30fps / H.264 CRF 18 / yuv420p / AAC 192k / -14 LUFS
@@ -99,12 +101,24 @@ if (a1 === '--vo') {
     const bedIdx = tracks.length + 1;
     // 사이드체인: 나레이션이 나오는 동안 BGM을 눌러 말이 묻히지 않게 한다.
     // 음악이 주장하면 자막이 안 읽힌다 — 이 채널에서 BGM은 바닥이지 곡이 아니다.
-    graph = `${chain};[m]asplit=2[m1][sc];` +
+    // 사이드체인 입력(나레이션)이 끝나면 압축기 출력도 끝난다. 그대로 두면 마지막 나레이션
+    // 직후 BGM이 뚝 끊긴다(001화 실측: 56.5초에 -21dB → 디지털 무음). apad로 사이드체인을 연장한다.
+    graph = `${chain};[m]asplit=2[m1][sc0];[sc0]apad[sc];` +
             `[${bedIdx}:a]anull[bedraw];` +
             `[bedraw][sc]sidechaincompress=threshold=0.02:ratio=8:attack=12:release=380[bed];` +
             `[m1][bed]amix=inputs=2:normalize=0:dropout_transition=0[mix]`;
     preLabel = 'mix';
   }
+
+  // 결말을 설계한다: 영상 끝 3초 전부터 1.5초에 걸쳐 사라지고, 마지막 1.5초는 무음.
+  // 연출안(03-direction.md)의 "끝은 소리 없이 읽게 둔다"를 사고가 아니라 의도로 만든다.
+  // 길이를 영상에 맞춰 자르므로 라우드니스 측정도 실제로 나가는 오디오 그대로를 잰다.
+  const fadeAt = process.env.FADE_AT ?? Math.max(0, DURATION - 3).toFixed(2);
+  // 입력 하나(마지막 나레이션)가 끝나는 순간 믹서 출력의 타임스탬프가 흐트러진다.
+  // 그러면 afade가 시각을 잘못 읽어, 끝난 페이드 뒤로 BGM이 되살아났다(001화: 56.5초부터).
+  // 샘플 수로 타임스탬프를 다시 매겨 시각을 믿을 수 있게 한다.
+  graph += `;[${preLabel}]asetpts=N/SR/TB,atrim=0:${DURATION.toFixed(3)},afade=t=out:st=${fadeAt}:d=1.5[pre]`;
+  preLabel = 'pre';
 
   const measured = measureLoudness(args, graph, preLabel);
   const ln = measured
@@ -115,7 +129,9 @@ if (a1 === '--vo') {
   if (!measured) console.warn('경고: 라우드니스 측정 실패 — 1패스로 진행합니다.');
   else if (process.env.LN_DEBUG) console.log('측정:', JSON.stringify(measured));
 
-  args.push('-filter_complex', `${graph};[${preLabel}]${ln},${PAD}[ao]`,
+  const lnStage = process.env.NO_LN ? 'anull' : ln;   // 진단용: 정규화 없이 굽기
+  if (process.env.LN_DEBUG) console.log('그래프:', `${graph};[${preLabel}]${lnStage},${PAD}[ao]`);
+  args.push('-filter_complex', `${graph};[${preLabel}]${lnStage},${PAD}[ao]`,
             '-map', '0:v', '-map', '[ao]',
             '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest');
   mode = `나레이션 ${present.length}/${lines.length}줄 + 효과음 ${cues.length}개` +

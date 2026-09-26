@@ -15,15 +15,15 @@
 </style>
 <div class="wrap">
   <h1>001 · 가장 깊은 구멍</h1>
-  <div class="sub">59.00초 · 1080×1920 · 30fps · 프레임 1770 · 컷 없음(전 구간 연속 모션)</div>
+  <div class="sub">59.00초 · 1080×1920 · 30fps · 나레이션 Supertonic 3 · -13.9 LUFS · 컷 없음</div>
   <div class="grid" id="g"></div>
   <div class="note">각 칸의 시각을 그대로 말씀해 주시면 됩니다 — 예: "0:22 화면이 비어 보인다"</div>
 </div>
 <script>
   // 씬의 전환 지점을 고른다. 자막이 바뀌는 순간과 그 중간을 섞어 배치했다.
-  const TIMES = [0.8, 2.4, 3.6, 6.0, 9.0, 11.4,
-                 13.5, 17.5, 22.0, 26.5, 31.0, 35.0,
-                 40.0, 43.5, 45.5, 48.0, 52.8, 56.5];
+  const TIMES = [0.8, 3.6, 6.0, 9.0, 13.5, 17.5,
+                 22.0, 26.5, 31.0, 35.5, 40.0, 43.5,
+                 45.5, 48.0, 51.0, 53.5, 56.0, 58.5];
   const pad = n => String(n).padStart(5, '0');
   const tc  = t => `${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
   document.getElementById('g').innerHTML = TIMES.map(t => {
