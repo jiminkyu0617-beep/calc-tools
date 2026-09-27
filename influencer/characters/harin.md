@@ -14,14 +14,15 @@
 
 ## 고정 외모 문장 — 모든 생성 명령에 그대로 붙인다
 > 캐릭터 일관성의 핵심. 한 글자도 바꾸지 않는다. 이미지 모델은 영어를 더 잘 따르므로 영문을 쓴다.
+> **v2 (2026-09-27 확정)**: 사용자가 기준 이미지(seed 3101) 얼굴로 확정했다. 문장을 사진에 맞췄다 — 가운데 가르마, 앞머리 없음, 점 없음. 이제부터는 이 문장을 바꾸지 않는다.
 
 ```
 A 29-year-old Korean woman, oval face with soft jawline, natural double eyelids,
-dark brown eyes, straight black-brown hair cut in a chin-length bob with side-swept bangs,
-thin round silver-rimmed glasses, light warm skin with a small mole under the left eye,
+dark brown eyes, straight black-brown hair in a collarbone-length bob with a center part and no bangs,
+thin round silver-rimmed glasses, light warm clear skin,
 slim build, height about 163cm, calm and slightly shy expression, natural minimal makeup.
 ```
-한국어 설명: 턱선까지 오는 흑갈색 단발에 옆으로 넘긴 앞머리, 얇은 은테 동그란 안경, **왼쪽 눈 밑 작은 점**(식별 표지), 차분하고 약간 수줍은 표정.
+한국어 설명: 쇄골까지 오는 흑갈색 단발, 가운데 가르마에 앞머리 없음, **얇은 은테 동그란 안경**(식별 표지), 차분하고 약간 수줍은 표정.
 
 ## 기준 이미지 (2026-09-27 생성)
 ![하린 기준 이미지](../assets/harin/ref-seed3101.webp)
@@ -31,7 +32,7 @@ slim build, height about 163cm, calm and slightly shy expression, natural minima
   - 원래 계획은 `mcp-tools/Qwen-Image`였지만 Space가 두 번 연속 `ZeroGPU worker error`를 내서 같은 seed·같은 프롬프트로 바꿨다. 이 Space는 네거티브 칸이 없어 금지어를 프롬프트 끝에 붙였다
 - **후보 4장**(seed 1029·2045·3101·4177)은 같은 폴더 `ref-seed*.webp`
 - **고른 이유**: 4장 중 머리 길이가 턱~쇄골 단발에 가장 가깝고, 은테 동그란 안경이 얇고 왜곡이 없으며, 피부 결이 자연스럽다. 2045는 머리가 길고, 1029·4177은 안경·표정은 좋지만 머리가 어깨까지 내려온다
-- **고정 외모 문장과 다른 점 (다음 생성 때 보완)**
+- **v1 고정 외모 문장과 달랐던 점** → 사용자가 이 얼굴로 확정해 v2 문장을 사진에 맞춤 (해결)
   - 옆으로 넘긴 앞머리가 4장 모두 없다 — 가운데 가르마로 나왔다
   - 왼쪽 눈 밑 점이 기준 이미지에 보이지 않는다. 1029에만 점이 있는데 오른쪽 눈 밑이다. 필요하면 편집 모델로 점만 추가한다
 - **같은 얼굴로 만든 컷** (`prithivMLmods/Qwen-Image-Edit-2509-LoRAs-Fast`, Edit-Skin LoRA)
