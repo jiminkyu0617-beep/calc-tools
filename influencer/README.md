@@ -53,3 +53,24 @@ Mark Tilbury의 7일 실험(`youtube/sample-tilbury-analysis.md`)을 **한국 �
 1. **이 환경의 네트워크 설정에서 `huggingface.co` 허용** → 여기서 CPU로 생성 (느리고 품질은 중간)
 2. **claude.ai에 무료 크레딧이 있는 이미지 생성 커넥터 연결** → 프롬프트를 그대로 붙여 넣기 (약관의 상업 이용 조건 확인)
 3. **월 7~10달러 유료 요금제**(Kling Standard 등) → 상업 이용 가능, 영상까지
+
+### 2026-09-27 시도: 허깅페이스 커넥터 — 생성 기능이 꺼진 채로 연결됨
+
+커넥터는 붙었지만(무료 계정) 생성 호출이 `gradio=none` 설정으로 막혀 있다. 이 값은 커넥터 주소에 들어 있는 설정이라 세션 안에서는 바꿀 수 없다.
+허깅페이스 MCP 서버 소스(`huggingface/hf-mcp-server`)를 보면 `gradio=none`이면 Space 호출이 전부 꺼진다. 허깅페이스 쪽 MCP 설정에 Space를 추가해도 마찬가지다.
+
+**푸는 법**
+1. https://claude.ai/customize/connectors 에서 **사용자 지정 커넥터를 추가**한다. 주소는 `https://huggingface.co/mcp?login`이다(`gradio=none` 없이).
+2. **새 세션을 시작**한다. 커넥터는 세션을 시작할 때 읽힌다.
+
+비용은 무료 계정의 하루 ZeroGPU 할당량에서 나간다. 다 쓰면 오류가 나고 다음 날 다시 채워진다. 결제 카드를 등록하지 않았다면 요금이 청구되지 않는다.
+
+**쓸 Space (모델 라이선스가 모두 Apache 2.0이라 상업 이용 가능)**
+| 단계 | Space | 설정 |
+|---|---|---|
+| ① 기준 얼굴 후보 4장 | `mcp-tools/Qwen-Image` | 3:4, seed 1029·2045·3101·4177 고정, `randomize_seed:false` |
+| ② 같은 얼굴로 옷·장소 3컷 | `prithivMLmods/Qwen-Image-Edit-2509-LoRAs-Fast` | 기준 이미지 + "same woman, now wearing …" |
+| ③ 릴스 영상 1개 (5초) | `zerogpu-aoti/wan2-2-fp8da-aoti-faster` | ②의 1번 컷 + `content/harin-reels.md` 1번 움직임 |
+
+①의 프롬프트는 "고정 외모 문장 + 옷 1(아이보리 가디건) + 원룸 책상, 스탠드 조명, 스마트폰 촬영 느낌"이다.
+네거티브 프롬프트는 `text, watermark, logo, blurry, heavy makeup, airbrushed skin, plastic skin, celebrity, extra fingers`이다.
