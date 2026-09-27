@@ -43,7 +43,7 @@ Mark Tilbury의 7일 실험(`youtube/sample-tilbury-analysis.md`)을 **한국 �
 - `content/` — 계정별 릴스 10편 기획 + 생성 프롬프트
 - `product/30일-지출-리셋-워크북.pdf` — **실제 판매용 A4 14쪽** (원본 `workbook.html`, 재생성: `youtube/render/pdf.mjs`)
 - `product/sales-page.md` — 판매 페이지 문구, 가격, FAQ
-- `profile-mock.png` — 세 계정 인스타그램 프로필 미리보기 (AI 라벨·소개글·릴스 표지 9개, 캐릭터 사진 자리는 비움)
+- `profile-mock.png` — 세 계정 인스타그램 프로필 미리보기 (AI 라벨·소개글·릴스 표지 9개, 하린만 기준 이미지를 넣음)
 
 ## 막혀 있는 것: 캐릭터 사진·영상
 
@@ -74,3 +74,11 @@ Mark Tilbury의 7일 실험(`youtube/sample-tilbury-analysis.md`)을 **한국 �
 
 ①의 프롬프트는 "고정 외모 문장 + 옷 1(아이보리 가디건) + 원룸 책상, 스탠드 조명, 스마트폰 촬영 느낌"이다.
 네거티브 프롬프트는 `text, watermark, logo, blurry, heavy makeup, airbrushed skin, plastic skin, celebrity, extra fingers`이다.
+
+**결과 (같은 날 재시도)** — 사용자 지정 커넥터(`HF Spaces`, `https://huggingface.co/mcp?login`)로는 Space 호출이 됐다.
+- ① `mcp-tools/Qwen-Image`가 `ZeroGPU worker error`를 두 번 내서 `mcp-tools/Z-Image-Turbo`(Apache 2.0)로 같은 seed 4장을 만들었다. 기준은 seed 3101 → `characters/harin.md` "기준 이미지" 절
+- ② 편집 Space는 이미지를 URL이 아니라 **base64 문자열**(`image_b64`)로만 받는다. 기준 이미지를 320×424 JPEG로 줄여 넣었고, 결과는 768×1024 PNG(base64)로 돌아온다. LoRA 하나를 반드시 골라야 해서 Apache 2.0인 `Edit-Skin`을 썼다(`Next-Scene`은 MIT라 뺐다)
+- 1번·2번 컷 통과, 8번 컷 보류. 8번 재시도에서 **무료 ZeroGPU 할당량 소진** → ③ 영상은 못 만들었다
+- 호출 수: Qwen-Image 2(실패) · Z-Image 4 · 편집 5(마지막 1개는 할당량 초과로 실패) = 생성 시도 11, 성공 8
+- 컨테이너에서 `*.hf.space`는 막혀 있다(403). 하지만 커넥터가 결과 이미지를 직접 돌려줘서 파일로 저장할 수 있었다
+- **다음 할 일**: 할당량이 다시 차면 ⑴ 8번 컷 재시도 ⑵ `zerogpu-aoti/wan2-2-fp8da-aoti-faster`로 1번 컷 5초 영상. 이 Space는 입력 이미지를 **공개 URL**로만 받는데 편집 결과에는 URL이 없다. 1번 컷을 공개 주소에 올려야 한다(예: 허깅페이스 MCP 설정에서 "Contribute Repos"를 켜고 본인 저장소에 업로드)

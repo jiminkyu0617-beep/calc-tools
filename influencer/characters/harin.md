@@ -23,6 +23,25 @@ slim build, height about 163cm, calm and slightly shy expression, natural minima
 ```
 한국어 설명: 턱선까지 오는 흑갈색 단발에 옆으로 넘긴 앞머리, 얇은 은테 동그란 안경, **왼쪽 눈 밑 작은 점**(식별 표지), 차분하고 약간 수줍은 표정.
 
+## 기준 이미지 (2026-09-27 생성)
+![하린 기준 이미지](../assets/harin/ref-seed3101.webp)
+
+- **파일**: `influencer/assets/harin/ref-seed3101.webp` (864×1152, 3:4). 프로필용 정사각 크롭은 `assets/harin/avatar.jpg`
+- **모델**: `Tongyi-MAI/Z-Image-Turbo` (Apache 2.0) — Space `mcp-tools/Z-Image-Turbo`, seed **3101**, 8 step, 랜덤 seed 끔
+  - 원래 계획은 `mcp-tools/Qwen-Image`였지만 Space가 두 번 연속 `ZeroGPU worker error`를 내서 같은 seed·같은 프롬프트로 바꿨다. 이 Space는 네거티브 칸이 없어 금지어를 프롬프트 끝에 붙였다
+- **후보 4장**(seed 1029·2045·3101·4177)은 같은 폴더 `ref-seed*.webp`
+- **고른 이유**: 4장 중 머리 길이가 턱~쇄골 단발에 가장 가깝고, 은테 동그란 안경이 얇고 왜곡이 없으며, 피부 결이 자연스럽다. 2045는 머리가 길고, 1029·4177은 안경·표정은 좋지만 머리가 어깨까지 내려온다
+- **고정 외모 문장과 다른 점 (다음 생성 때 보완)**
+  - 옆으로 넘긴 앞머리가 4장 모두 없다 — 가운데 가르마로 나왔다
+  - 왼쪽 눈 밑 점이 기준 이미지에 보이지 않는다. 1029에만 점이 있는데 오른쪽 눈 밑이다. 필요하면 편집 모델로 점만 추가한다
+- **같은 얼굴로 만든 컷** (`prithivMLmods/Qwen-Image-Edit-2509-LoRAs-Fast`, Edit-Skin LoRA)
+  | 파일 | 릴스 | 얼굴 일관성 |
+  |---|---|---|
+  | `assets/harin/cut01-desk-night.jpg` | 1번 원룸 책상·밤 | 통과 — 머리·안경·옷 일치, 얼굴이 조금 성숙해 보임 |
+  | `assets/harin/cut02-store-hoodie.jpg` | 2번 편의점·후드티·영수증 | 통과(재시도본) — 첫 시도는 눈화장이 진해지고 인상이 달라 버림 |
+  | `assets/harin/cut08-cafe-blazer.jpg` | 8번 카페·블레이저 | **보류** — 인상이 기준보다 서구적. 재시도 전에 할당량 소진 |
+- 영수증·간판 글자는 생성 모델이 깨뜨렸다. 게시할 때 흐리게 처리하고 숫자는 자막으로 넣는다
+
 ## 옷 (3벌만 돌려 입는다 — 옷이 매번 다르면 사람이 달라 보인다)
 1. 아이보리 니트 가디건 + 흰 티셔츠 (집·카페)
 2. 네이비 블레이저 + 연회색 슬랙스 (출근)

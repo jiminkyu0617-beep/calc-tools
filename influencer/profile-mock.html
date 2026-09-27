@@ -30,7 +30,7 @@
 <div id="root" style="display:contents"></div>
 <script>
 const P = [
-  { user:'harin.30days', name:'하린 · 30일 지출 기록', init:'하', c1:'#2B3A4A', c2:'#E8563A',
+  { user:'harin.30days', name:'하린 · 30일 지출 기록', init:'하', c1:'#2B3A4A', c2:'#E8563A', img:'assets/harin/avatar.jpg',
     bio:'AI로 만든 가상 인물 하린이에요 🤖\n월급날 다음 날부터 30일, 쓴 돈을 전부 적어요.\n📒 30일 지출 리셋 워크북 ↓', link:'워크북 보러 가기',
     hl:['30일','영수증','결산','워크북'],
     covers:['D-30\n오늘 쓴 돈 0원','오늘 12,400원\n커피가 절반','안 보는 구독 3개\n= 월 27,700원','도시락 4,200원\n사먹기 11,000원','무지출 3일째\n오늘 무너짐','월급 300만 원\n4대보험 29만 원','장바구니\n48,000 → 19,000','텀블러 300원\n× 20일','1주차 총 지출\n187,300원'] },
@@ -45,7 +45,7 @@ const P = [
 ];
 document.getElementById('root').innerHTML = P.map(p => `<div class="phone">
   <div class="top"><span>${p.user}</span><span>≡</span></div>
-  <div class="head"><div class="avatar" style="background:linear-gradient(135deg,${p.c1},${p.c2})">${p.init}</div>
+  <div class="head"><div class="avatar" style="background:${p.img ? `center/cover url(${p.img})` : `linear-gradient(135deg,${p.c1},${p.c2})`}">${p.img ? '' : p.init}</div>
     <div class="stats"><div><b>10</b>게시물</div><div><b>0</b>팔로워</div><div><b>0</b>팔로잉</div></div></div>
   <div class="name">${p.name}</div>
   <div class="ailabel">🤖 AI 생성 인물</div>
