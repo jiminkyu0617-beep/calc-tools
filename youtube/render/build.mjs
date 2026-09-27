@@ -95,7 +95,8 @@ if (a1 === '--vo') {
   let preLabel = 'm';
 
   if (useBgm) {
-    const bed = resolve(root, 'bgm', 'bed.wav');
+    // BGM_FILE로 다른 베드를 쓸 수 있다 (인스타 캐릭터 릴스: bgm/ig-warm.wav). 기본은 채널 베드
+    const bed = resolve(root, process.env.BGM_FILE ?? 'bgm/bed.wav');
     if (!existsSync(bed)) { console.error(`BGM 베드가 없습니다. 먼저: node bgm.mjs`); process.exit(1); }
     args.push('-stream_loop', '-1', '-i', bed);   // 16초 루프를 영상 길이까지 이어 붙인다
     const bedIdx = tracks.length + 1;
@@ -142,6 +143,8 @@ if (a1 === '--vo') {
   mode = '단일 오디오 트랙';
 }
 
+// -shortest는 AAC 패킷 단위로 끊어 오디오가 0.5초가량 더 남는다(릴스 1편 실측 10.58초). 길이를 못 박는다
+args.push('-t', DURATION.toFixed(3));
 args.push('-c:v', 'libx264', '-crf', '18', '-preset', 'slow', '-pix_fmt', 'yuv420p', outFile);
 
 console.log(`조립 중 (${mode})...`);

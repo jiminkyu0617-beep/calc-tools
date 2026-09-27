@@ -22,6 +22,8 @@ from pathlib import Path
 import numpy as np, soundfile as sf, sherpa_onnx as so
 
 VOICE_SID, SPEED, LANG = 7, 0.90, "ko"
+# 다른 계정(인스타 캐릭터)은 목소리가 달라야 한다. 씬 폴더의 voice.json이 있으면 그 값을 쓴다.
+#   예) {"sid": 0, "speed": 0.95}  — 채널 기본값(sid 7)은 건드리지 않는다
 SEEDS = ["42", "7", "123", "2024", "99"]   # 후보. 줄마다 인식 오류가 가장 적은 것을 고른다
 
 ROOT = Path(__file__).resolve().parent
@@ -29,6 +31,9 @@ scene = sys.argv[1] if len(sys.argv) > 1 else sys.exit(__doc__)
 check = "--check" in sys.argv
 search = "--search" in sys.argv
 spec = json.loads((ROOT / "scenes" / scene / "narration.json").read_text(encoding="utf-8"))
+_vj = ROOT / "scenes" / scene / "voice.json"
+if _vj.exists():
+    _v = json.loads(_vj.read_text()); VOICE_SID = _v.get("sid", VOICE_SID); SPEED = _v.get("speed", SPEED)
 out = ROOT / "out" / scene / "vo"; out.mkdir(parents=True, exist_ok=True)
 
 M = next(iter(glob.glob(str(ROOT / "models/sherpa-onnx-supertonic-3-*"))), None)
