@@ -13,13 +13,13 @@
 | **설정하지 않는 것** | 트레이너·물리치료사·의사 등 자격. 체중 감량 약속. 의학적 효과 주장 |
 
 ## 고정 외모 문장
+> **v2 (2026-09-28 확정)**: 사용자가 기준 이미지(seed 1029) 얼굴로 확정했다. 사진에 없는 눈썹 흉터를 뺐다. 이제부터 바꾸지 않는다.
 ```
 A 34-year-old Korean man, square face with a strong jawline, short neat black hair
-with a slight side part, thick straight eyebrows, dark brown eyes, light stubble,
-medium-tan skin, a thin scar through the right eyebrow, broad shoulders, average height
-about 176cm, friendly tired smile.
+with a slight side part, thick straight eyebrows, dark brown eyes, very light stubble,
+medium-tan skin, broad shoulders, average height about 176cm, friendly tired smile.
 ```
-한국어 설명: 짧은 흑발 가르마, 굵은 일자 눈썹, 옅은 수염, **오른쪽 눈썹을 가르는 가는 흉터**(식별 표지), 피곤하지만 친근한 미소.
+한국어 설명: 짧은 흑발 옆 가르마, 굵은 일자 눈썹, 아주 옅은 수염, 각진 턱, 피곤하지만 친근한 미소. **식별 표지는 진회색 운동복 + 짧은 옆 가르마**(흉터는 생성 모델이 그리지 못해 뺐다).
 
 ## 옷
 1. 진회색 반팔 운동복 상하의
@@ -47,7 +47,12 @@ AI로 만든 가상 인물 도윤입니다 🤖
 ※ 의학적 조언이 아닙니다
 ```
 
-## 기준 이미지 후보 (2026-09-28 생성, 확정 전)
+## 기준 이미지 — seed 1029 확정 (2026-09-28)
+![도윤 기준 이미지](../assets/doyun/ref-seed1029.webp)
+
+프로필용 정사각 크롭: `assets/doyun/avatar.jpg`
+
+### 후보 기록
 모델 `Tongyi-MAI/Z-Image-Turbo`(Apache 2.0), Space `mcp-tools/Z-Image-Turbo`, 864×1152, 8 step, 랜덤 seed 끔. 옷 1(진회색 운동복), 장소 1(거실, 아침빛)
 
 | 파일 | 채점 |

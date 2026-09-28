@@ -13,13 +13,14 @@
 | **설정하지 않는 것** | 상담사·심리 전문가 자격. 특정인 험담. 연애 조작 기술 |
 
 ## 고정 외모 문장
+> **v2 (2026-09-28 확정)**: 사용자가 기준 이미지(seed 3101) 얼굴로 확정했다. 사진에 맞춰 무쌍·주근깨를 빼고 층진 머리로 고쳤다. 이제부터 바꾸지 않는다.
 ```
-A 31-year-old Korean woman, heart-shaped face, long dark brown hair with loose waves
-past the shoulders, warm brown eyes with monolid, soft arched eyebrows, fair skin with
-light freckles across the nose, small silver hoop earrings, slender build about 166cm,
+A 31-year-old Korean woman, heart-shaped face, long layered dark brown hair with soft
+loose waves past the shoulders, warm brown eyes with natural double eyelids, soft arched
+eyebrows, fair clear skin, small silver hoop earrings, slender build about 166cm,
 warm gentle smile.
 ```
-한국어 설명: 어깨 아래 느슨한 웨이브 긴 머리, 무쌍 눈, **콧등의 옅은 주근깨와 작은 은색 링 귀걸이**(식별 표지), 따뜻한 미소.
+한국어 설명: 어깨 아래 층진 긴 머리에 느슨한 웨이브, 자연스러운 쌍꺼풀, 따뜻한 미소. **식별 표지는 작은 은색 링 귀걸이**.
 
 ## 옷
 1. 크림색 터틀넥 니트
@@ -47,7 +48,12 @@ AI로 만든 가상 인물 세아야 🤖
 오늘 보낸 메시지, 다시 보면 어때?
 ```
 
-## 기준 이미지 후보 (2026-09-28 생성, 확정 전)
+## 기준 이미지 — seed 3101 확정 (2026-09-28)
+![세아 기준 이미지](../assets/sea/ref-seed3101.webp)
+
+프로필용 정사각 크롭: `assets/sea/avatar.jpg`
+
+### 후보 기록
 모델 `Tongyi-MAI/Z-Image-Turbo`(Apache 2.0), Space `mcp-tools/Z-Image-Turbo`, 864×1152, 8 step, 랜덤 seed 끔. 옷 1(크림색 터틀넥), 장소 1(창가 소파, 늦은 오후 빛)
 
 | 파일 | 채점 |

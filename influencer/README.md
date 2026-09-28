@@ -43,7 +43,7 @@ Mark Tilbury의 7일 실험(`youtube/sample-tilbury-analysis.md`)을 **한국 �
 - `content/` — 계정별 릴스 10편 기획 + 생성 프롬프트
 - `product/30일-지출-리셋-워크북.pdf` — **실제 판매용 A4 14쪽** (원본 `workbook.html`, 재생성: `youtube/render/pdf.mjs`)
 - `product/sales-page.md` — 판매 페이지 문구, 가격, FAQ
-- `profile-mock.png` — 세 계정 인스타그램 프로필 미리보기 (AI 라벨·소개글·릴스 표지 9개, 하린만 기준 이미지를 넣음)
+- `profile-mock.png` — 세 계정 인스타그램 프로필 미리보기 (AI 라벨·소개글·릴스 표지 9개, 세 계정 모두 확정한 기준 얼굴을 넣음)
 
 ## 막혀 있는 것: 캐릭터 사진·영상
 
