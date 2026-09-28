@@ -17,10 +17,13 @@ SR = 48000
 DUR = float(sys.argv[1]) if len(sys.argv) > 1 else 16.0
 OUT = Path(__file__).resolve().parent / (sys.argv[2] if len(sys.argv) > 2 else "bgm/ig-warm.wav")
 TARGET_PEAK_DB = -15.0   # 채널 베드(-24)보다 앞에 둔다. 브이로그는 음악이 분위기의 절반이다
-BPM = 84
+import os
+# 계정마다 결을 다르게: 템포와 조(반음 이동)만 바꾼다. 하린 84/0, 도윤 96/+2(조금 더 움직임), 세아 76/-3(더 느리고 낮게)
+BPM = float(os.environ.get("IG_BPM", 84))
+SHIFT = int(os.environ.get("IG_SHIFT", 0))
 BEAT = 60 / BPM
 
-def hz(midi): return 440 * 2 ** ((midi - 69) / 12)
+def hz(midi): return 440 * 2 ** ((midi + SHIFT - 69) / 12)
 
 # Fmaj7 → Em7 → Dm7 → Cmaj7 (내려가는 진행, 차분하고 밝다). 한 코드 = 4박
 CHORDS = [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59]]

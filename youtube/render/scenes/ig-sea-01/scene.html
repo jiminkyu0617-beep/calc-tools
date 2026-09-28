@@ -1,0 +1,111 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../theme.css">
+<!--
+  세아 릴스 1편 — "D-30 · 답장 미룬 메시지 7개" (influencer/content/sea-reels.md 1번)
+  세아 계정 규칙: 첫 1초에 메시지 한 줄 — 자막으로만. 실제 메신저 화면을 흉내 내지 않는다.
+
+  사진이 한 장뿐이다(기준 이미지 seed 3101 — 창가 소파, 휴대폰). 두 번째 컷을 만들기 전에
+  무료 GPU 할당량이 떨어졌다. 그래서 한 장을 두 번 쓴다:
+    컷 1 = 휴대폰을 쥔 손에 바짝 붙인 화면 (답장 못 한 메시지를 보고 있다)
+    컷 2 = 얼굴로 올라가 시선을 받는다
+  편집 컷(휴대폰을 뒤집어 놓는 장면)이 생기면 컷 1만 바꾸면 된다.
+-->
+<style>
+  :root { --paper:#FBF3F5; --ink:#2E2229; --pen:#C4577A; }
+  .shot { position:absolute; left:0; top:0; width:1080px; height:1920px; overflow:hidden; }
+  .shot img { position:absolute; top:0; height:1920px; will-change:transform; }
+  .shade { position:absolute; left:0; right:0; bottom:0; height:900px;
+           background:linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.55)); }
+  .shade-top { position:absolute; left:0; right:0; top:0; height:800px;
+               background:linear-gradient(to top, rgba(0,0,0,0), rgba(0,0,0,.4)); }
+  #card { position:absolute; left:72px; top:250px; padding:34px 44px 38px; background:var(--paper);
+          border-radius:28px; color:var(--ink); transform-origin:0 0; }
+  #card .d { font-size:150px; font-weight:900; line-height:1; letter-spacing:-4px; color:var(--pen); }
+  #card .spent { margin-top:14px; font-size:56px; font-weight:800; letter-spacing:-1px; white-space:nowrap; }
+  #card .spent b { color:var(--pen); }
+  /* 메시지 한 줄 — 말풍선·시간표시 같은 메신저 모양은 쓰지 않는다. 인용문처럼만 */
+  #quote { position:absolute; left:72px; top:660px; max-width:900px; color:#fff;
+           font-size:46px; font-weight:700; line-height:1.35; text-shadow:0 2px 12px rgba(0,0,0,.6); }
+  #quote small { display:block; margin-top:6px; font-size:32px; font-weight:600; opacity:.85; }
+  #ai { position:absolute; left:72px; top:150px; padding:10px 20px; border-radius:999px;
+        background:rgba(0,0,0,.45); color:#fff; font-size:28px; font-weight:600; }
+  #sub { position:absolute; left:72px; width:830px; top:1290px; text-align:center;
+         font-size:58px; font-weight:800; line-height:1.3; color:#fff; letter-spacing:-1px;
+         text-shadow:0 2px 14px rgba(0,0,0,.6); white-space:pre-line; }
+  #sub b { color:#FFD1DF; }
+</style>
+
+<div class="stage">
+  <div class="shot" id="s1"><img id="i1" src="sofa.jpg">
+    <!-- 휴대폰 뒷면 카메라가 특정 제조사 제품처럼 보인다(characters/sea.md). 컷 1에서만 크게 보이므로 흐린다 -->
+    <div id="blurPhone" style="position:absolute;left:-40px;top:1380px;width:420px;height:330px;border-radius:60px;
+         backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);-webkit-mask-image:radial-gradient(closest-side,#000 55%,transparent);mask-image:radial-gradient(closest-side,#000 55%,transparent)"></div></div>
+  <div class="shot" id="s2"><img id="i2" src="sofa.jpg"></div>
+  <div class="shade-top"></div>
+  <div class="shade"></div>
+  <div id="ai">AI로 만든 가상 인물</div>
+  <div id="card">
+    <div class="d">D-30</div>
+    <div class="spent">답장 미룬 메시지 <b>7개</b></div>
+  </div>
+  <div id="quote">“이번 주말에 시간 돼?”<small>3일째 답장 못 함</small></div>
+  <div id="sub"></div>
+</div>
+
+<script type="module">
+import { defineScene, seq, ease, lerp, $ } from '../../lib/scene.js';
+
+const CAPTIONS = [
+  [0.3, 3.2, '답장 안 한 메시지 <b>7개</b>'],
+  [3.4, 7.8, '바쁜 척했지만\n사실 뭐라고 할지 몰라서'],
+  [8.1, 11.0, '제일 오래 미룬 답장,\n며칠이야?'],
+];
+const NARRATION = [
+  '답장 안 한 메시지가 일곱 개.',
+  '바쁜 척했지만, 사실 뭐라고 할지 몰라서였어.',
+  '제일 오래 미룬 답장, 며칠이야?',
+];
+
+const CUT = 7.9;
+const DUR = 12;
+
+const i1 = $('#i1'), i2 = $('#i2'), s2 = $('#s2'), card = $('#card'), sub = $('#sub'), quote = $('#quote');
+
+function place(img, left, scale, ox, oy) {
+  img.style.left = -left + 'px';
+  img.style.transformOrigin = `${ox}px ${oy}px`;
+  img.style.transform = `scale(${scale})`;
+}
+
+function setSub(t) {
+  const c = CAPTIONS.find(([a, b]) => t >= a && t < b);
+  if (!c) { sub.style.opacity = 0; return; }
+  const [a, b, text] = c;
+  if (sub.dataset.text !== text) { sub.innerHTML = text; sub.dataset.text = text; }
+  sub.style.opacity = Math.min(ease.out(seq(t, a, a + 0.2)), 1 - seq(t, b - 0.15, b));
+  sub.style.transform = `translateY(${lerp(18, 0, ease.out(seq(t, a, a + 0.3)))}px)`;
+}
+
+defineScene({
+  duration: DUR,
+  fps: 30,
+  captions: CAPTIONS,
+  narration: NARRATION,
+  render(t) {
+    // 컷 1: 휴대폰을 쥔 손(원본 아래 왼쪽)에 붙어 있다가 더 다가간다
+    place(i1, 120, lerp(1.8, 1.9, ease.inOut(seq(t, 0, CUT))), 400, 1920);   // 1.35배는 눈에서 얼굴이 잘려 어색했다. 턱 아래만 남긴다
+    // 컷 2: 얼굴. 살짝 물러나며 시선을 받는다
+    place(i2, 180, lerp(1.12, 1.02, ease.out(seq(t, CUT, DUR))), 720, 760);
+    s2.style.opacity = t >= CUT ? 1 : 0;
+
+    const pc = ease.out(seq(t, 0, 0.35));
+    const shrink = ease.out(seq(t, CUT, CUT + 0.35));
+    card.style.transform = `translateY(${lerp(-10, 0, pc)}px) scale(${lerp(1.03, 1, pc) * lerp(1, 0.72, shrink)})`;
+    // 메시지 한 줄은 첫 프레임부터 보이고, 얼굴 컷에서 물러난다
+    quote.style.opacity = 1 - ease.out(seq(t, CUT - 0.3, CUT));
+
+    setSub(t);
+  },
+});
+</script>
