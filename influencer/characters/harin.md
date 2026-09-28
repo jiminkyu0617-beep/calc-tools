@@ -40,7 +40,7 @@ slim build, height about 163cm, calm and slightly shy expression, natural minima
   |---|---|---|
   | `assets/harin/cut01-desk-night.jpg` | 1번 원룸 책상·밤 | 통과 — 머리·안경·옷 일치, 얼굴이 조금 성숙해 보임 |
   | `assets/harin/cut02-store-hoodie.jpg` | 2번 편의점·후드티·영수증 | 통과(재시도본) — 첫 시도는 눈화장이 진해지고 인상이 달라 버림 |
-  | `assets/harin/cut08-cafe-blazer.jpg` | 8번 카페·블레이저 | **보류** — 인상이 기준보다 서구적. 재시도 전에 할당량 소진 |
+  | `assets/harin/cut08-cafe-blazer.jpg` | 8번 카페·블레이저 | **조건부 통과(09-28 재생성)** — 안경·단발·인상이 기준과 맞다. 기준보다 조금 성숙해 보임. 편집 입력을 240×320로 줄여 넣었다 |
 - 영수증·간판 글자는 생성 모델이 깨뜨렸다. 게시할 때 흐리게 처리하고 숫자는 자막으로 넣는다
 
 ## 옷 (3벌만 돌려 입는다 — 옷이 매번 다르면 사람이 달라 보인다)
@@ -74,3 +74,11 @@ AI로 만든 가상 인물 하린이에요 🤖
 월급날 다음 날부터 30일, 쓴 돈을 전부 적어요.
 📒 30일 지출 리셋 워크북 ↓
 ```
+
+## 생성 영상 (2026-09-28)
+- `zerogpu-aoti/wan2-2-fp8da-aoti-faster`(Wan 2.2 I2V, Apache 2.0)로 `cut01-desk-night.jpg`를 3초 영상으로 만들었다. 4 step, seed 42
+  - 5초·6 step은 커넥터 60초 제한에 걸려 시간 초과. **3초·4 step**이 제한 안에 들어온다
+  - 입력은 공개 저장소의 raw.githubusercontent.com 주소로 넣었다
+- **결과 파일을 이 작업 환경으로 받지 못했다.** 결과는 `*.hf.space` 주소로만 오는데, 컨테이너에서는 이 도메인이 막혀 있다(403)
+  - 사람이 브라우저로 받아 `influencer/assets/harin/reel01-desk.mp4`로 올리면, 릴스 1편의 컷 1을 이 영상으로 바꿔 다시 뽑는다
+  - Gradio 임시 파일이라 Space가 재시작되면 링크가 사라진다
