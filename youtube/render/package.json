@@ -1,0 +1,17 @@
+{
+  "name": "hangyeseon-render",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "채널 '한계선' 모션그래픽 렌더 파이프라인 — HTML/CSS/SVG → 프레임 캡처 → MP4",
+  "scripts": {
+    "frames": "node capture.mjs",
+    "video": "node build.mjs",
+    "render": "node capture.mjs && node build.mjs"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "playwright-core": "^1.49.0",
+    "pretendard": "^1.3.9"
+  }
+}

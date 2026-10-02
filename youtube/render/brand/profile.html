@@ -1,0 +1,15 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  /* 프로필은 800×800으로 올리지만 유튜브가 원형으로 자른다.
+     그리고 댓글창에서는 24px까지 줄어든다.
+     그 크기에서 살아남는 건 형태 하나뿐이다 — 글자는 죽는다. */
+  html, body { width: 800px; height: 800px; }
+  .mark { position: absolute; inset: 0; display: grid; place-items: center; }
+  .bar  { position: relative; width: 84px; height: 620px; background: var(--grid); border-radius: 42px; }
+  /* 헤드는 1/3 지점 — 001화의 "지각의 3분의 1"이 채널의 상징이 됐다 */
+  .head { position: absolute; left: 50%; top: 33.3%; width: 210px; height: 210px;
+          margin-left: -105px; margin-top: -105px; border-radius: 50%; background: var(--accent); }
+</style>
+<div class="mark"><div class="bar"><div class="head"></div></div></div>

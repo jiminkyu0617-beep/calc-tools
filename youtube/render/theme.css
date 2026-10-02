@@ -1,0 +1,98 @@
+/* ─────────────────────────────────────────────────────────────
+   채널 "한계선" — 디자인 토큰
+   lookbook.md의 변수 6개(색·빛·질감·타이포·모션·여백)를 코드로 고정한 것.
+   룩을 바꾼다는 건 이 파일을 고친다는 뜻이고, 그러면 전 회차가 같이 바뀐다.
+   ───────────────────────────────────────────────────────────── */
+
+@font-face { font-family: 'Pretendard'; font-weight: 400;
+  src: url('node_modules/pretendard/dist/public/static/Pretendard-Regular.otf') format('opentype'); }
+@font-face { font-family: 'Pretendard'; font-weight: 600;
+  src: url('node_modules/pretendard/dist/public/static/Pretendard-SemiBold.otf') format('opentype'); }
+@font-face { font-family: 'Pretendard'; font-weight: 800;
+  src: url('node_modules/pretendard/dist/public/static/Pretendard-ExtraBold.otf') format('opentype'); }
+@font-face { font-family: 'Pretendard'; font-weight: 900;
+  src: url('node_modules/pretendard/dist/public/static/Pretendard-Black.otf') format('opentype'); }
+
+:root {
+  /* 1. 색 — 강조색은 화면의 10% 이하로만 쓴다 */
+  --bg:        #0B0D10;
+  --surface:   #151A21;
+  --grid:      #232B35;
+  --text:      #F2F5F7;
+  --muted:     #8A96A3;
+  --accent:    #FF4D2E;   /* 숫자와 핵심 단어에만 */
+  --accent-dim:#7A2417;
+
+  /* 2. 빛 — 광원 없음. 평면. 그림자를 쓰지 않는다 */
+  --shadow: none;
+
+  /* 3. 질감 — 0. 그레인·글로우 없음. 깨끗함이 이 채널의 룩이다 */
+
+  /* 4. 타이포 */
+  --font: 'Pretendard', system-ui, sans-serif;
+  --fs-hook:    92px;   /* 후킹 자막 */
+  --fs-caption: 64px;   /* 본문 자막 */
+  --fs-label:   34px;   /* 축·주석 */
+  --fs-badge:   26px;   /* 출처 뱃지 */
+  --fs-number: 150px;   /* 주인공 숫자 */
+
+  /* 6. 여백 — 쇼츠 UI 안전 영역 */
+  --safe-top:    12%;
+  --safe-bottom: 20%;
+  --gutter:      72px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 1080px; height: 1920px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-feature-settings: 'tnum' 1;   /* 숫자 자릿수 고정 — 카운트업에서 흔들리지 않는다 */
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.stage { position: relative; width: 1080px; height: 1920px; }
+
+/* 안전 영역 — 핵심 정보는 이 안에만 */
+.safe {
+  position: absolute; left: var(--gutter); right: var(--gutter);
+  top: var(--safe-top); bottom: var(--safe-bottom);
+}
+
+/* 자막 */
+.caption {
+  position: absolute; left: var(--gutter); right: var(--gutter);
+  bottom: 22%;
+  font-size: var(--fs-caption); font-weight: 800; line-height: 1.25;
+  letter-spacing: -0.02em; text-align: center;
+  white-space: pre-line;
+}
+.caption .hl { color: var(--accent); }
+
+.hook {
+  font-size: var(--fs-hook); font-weight: 900; line-height: 1.15;
+  letter-spacing: -0.035em; text-align: center;
+}
+
+.number {
+  font-size: var(--fs-number); font-weight: 900;
+  letter-spacing: -0.04em; line-height: 1;
+}
+.number.unit { font-size: 58px; font-weight: 800; color: var(--muted); margin-left: 14px; }
+.number .unit { font-size: 0.38em; font-weight: 800; color: var(--muted); margin-left: 14px; }
+
+.label { font-size: var(--fs-label); font-weight: 600; color: var(--muted); letter-spacing: -0.01em; }
+
+/* 출처 뱃지 — 전 구간 고정. 이 채널의 신뢰 장치다 */
+.badge {
+  position: absolute; right: var(--gutter); bottom: 9%;
+  font-size: var(--fs-badge); font-weight: 600; color: var(--muted);
+  border: 2px solid var(--grid); border-radius: 8px; padding: 10px 18px;
+}
+
+/* 눈금자·축 */
+.axis { position: absolute; background: var(--grid); }
+.tick { position: absolute; font-size: var(--fs-label); color: var(--muted); font-weight: 600; }

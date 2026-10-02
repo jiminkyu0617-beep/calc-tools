@@ -1,0 +1,33 @@
+{
+  "scene": "ig-harin-01",
+  "lines": [
+    {
+      "index": 1,
+      "file": "01.wav",
+      "start": 0.3,
+      "end": 2.4,
+      "window": 2.1,
+      "estimate": 1.86,
+      "text": "월급 들어온 다음 날."
+    },
+    {
+      "index": 2,
+      "file": "02.wav",
+      "start": 2.6,
+      "end": 6.2,
+      "window": 3.6,
+      "estimate": 3.49,
+      "text": "오늘부터 삼십 일, 쓴 돈을 전부 적어요."
+    },
+    {
+      "index": 3,
+      "file": "03.wav",
+      "start": 6.5,
+      "end": 8.6,
+      "window": 2.1,
+      "estimate": 1.63,
+      "text": "같이 적어볼래요?"
+    }
+  ],
+  "sfx": []
+}
