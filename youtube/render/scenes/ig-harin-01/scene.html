@@ -1,0 +1,124 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../theme.css">
+<!--
+  하린 릴스 1편 — "D-30 · 오늘 쓴 돈 0원" (influencer/content/harin-reels.md 1번)
+  유튜브 채널(한계선)과 다른 계정이라 룩도 다르다: 어두운 평면 대신 사진 + 따뜻한 종이색 카드.
+  렌더 엔진은 같다 — render(t) 하나로 결정론적으로 뽑는다.
+
+  사진 두 장(허깅페이스 무료 생성, Apache 2.0 모델)으로 5초 생성 영상을 대신한다.
+    desk.jpg = cut01 (책상에서 가계부를 쓰는 컷)  → 손 쪽으로 천천히 밀고 들어간다
+    look.jpg = 기준 이미지 seed 3101 (카메라를 본다) → "카메라를 잠깐 본다"를 컷으로 만든다
+  같은 옷(아이보리 가디건)이라 두 컷이 한 사람의 한 장면으로 이어진다.
+-->
+<style>
+  :root {
+    --paper: #FBF6EC;     /* 가계부 종이색 — 하린 계정의 바탕색 */
+    --ink:   #2B2621;
+    --pen:   #E0573B;     /* 숫자에만 쓰는 볼펜 빨강 */
+  }
+  .shot { position:absolute; left:0; top:0; width:1080px; height:1920px; overflow:hidden; }
+  .shot img { position:absolute; top:0; height:1920px; will-change:transform; }
+  /* 아래쪽 자막이 사진 위에서 읽히도록 바닥만 어둡게 */
+  .shade { position:absolute; left:0; right:0; bottom:0; height:900px;
+           background:linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.55)); }
+  .shade-top { position:absolute; left:0; right:0; top:0; height:700px;
+               background:linear-gradient(to top, rgba(0,0,0,0), rgba(0,0,0,.35)); }
+
+  /* 제목 카드 — 첫 프레임부터 숫자가 보인다 (릴스 규칙: 첫 1초에 숫자) */
+  #card { position:absolute; left:72px; top:250px; padding:34px 44px 38px; background:var(--paper);
+          border-radius:28px; color:var(--ink); transform-origin:0 0; }
+  #card .d { font-size:150px; font-weight:900; line-height:1; letter-spacing:-4px; color:var(--pen); }
+  #card .spent { margin-top:14px; font-size:60px; font-weight:800; letter-spacing:-1px; white-space:nowrap; }
+  #card .spent b { color:var(--pen); }
+  /* 가계부 줄 — 카드가 공책 한 장처럼 보이게 */
+  #card .rule { height:3px; background:#E6DCC8; margin-top:18px; }
+
+  /* 가상 인물 표시 — 게시물 안에도 넣는다. 캡션·프로필 라벨과 별개 */
+  #ai { position:absolute; left:72px; top:150px; padding:10px 20px; border-radius:999px;
+        background:rgba(0,0,0,.45); color:#fff; font-size:28px; font-weight:600; }
+
+  /* 말 자막 — 인스타 하단 UI(20%)와 오른쪽 버튼 줄을 피한다 */
+  #sub { position:absolute; left:72px; width:830px; top:1290px; text-align:center;
+         font-size:58px; font-weight:800; line-height:1.3; color:#fff; letter-spacing:-1px;
+         text-shadow:0 2px 14px rgba(0,0,0,.6); white-space:pre-line; }
+  #sub b { color:#FFD9A8; }
+</style>
+
+<div class="stage">
+  <div class="shot" id="s1"><img id="i1" src="desk.jpg"></div>
+  <div class="shot" id="s2"><img id="i2" src="look.jpg"></div>
+  <div class="shade-top"></div>
+  <div class="shade"></div>
+  <div id="ai">AI로 만든 가상 인물</div>
+  <div id="card">
+    <div class="d" id="dnum">D-30</div>
+    <div class="spent">오늘 쓴 돈 <b id="won">0원</b></div>
+    <div class="rule"></div>
+  </div>
+  <div id="sub"></div>
+</div>
+
+<script type="module">
+import { defineScene, seq, ease, lerp, $ } from '../../lib/scene.js';
+
+// 자막은 말의 요점, 나레이션은 읽는 말. 숫자는 소리 나는 대로 적는다.
+const CAPTIONS = [
+  [0.3, 2.4, '월급 들어온 다음 날'],
+  [2.6, 6.2, '오늘부터 <b>30일</b>,\n쓴 돈을 전부 적어요'],
+  [6.5, 8.6, '같이 적어볼래요?'],
+];
+const NARRATION = [
+  '월급 들어온 다음 날.',
+  '오늘부터 삼십 일, 쓴 돈을 전부 적어요.',
+  '같이 적어볼래요?',
+];
+
+const CUT = 6.3;      // 두 번째 말이 끝나고 질문 직전에 카메라를 본다
+
+const i1 = $('#i1'), i2 = $('#i2'), s2 = $('#s2'), card = $('#card'), sub = $('#sub');
+
+/* 사진 배치. 원본은 3:4라 9:16 화면을 채우려면 높이에 맞춰 키우고 옆을 자른다.
+   left는 원본 기준 좌표(px, 1920 높이로 키운 뒤)에서 화면 왼쪽 끝이 올 자리. */
+function place(img, left, scale, ox, oy) {
+  img.style.left = -left + 'px';
+  img.style.transformOrigin = `${ox}px ${oy}px`;
+  img.style.transform = `scale(${scale})`;
+}
+
+function setSub(t) {
+  const c = CAPTIONS.find(([a, b]) => t >= a && t < b);
+  if (!c) { sub.style.opacity = 0; return; }
+  const [a, b, text] = c;
+  if (sub.dataset.text !== text) { sub.innerHTML = text; sub.dataset.text = text; }
+  sub.style.opacity = Math.min(ease.out(seq(t, a, a + 0.2)), 1 - seq(t, b - 0.15, b));
+  sub.style.transform = `translateY(${lerp(18, 0, ease.out(seq(t, a, a + 0.3)))}px)`;
+}
+
+defineScene({
+  duration: 10,
+  fps: 30,
+  captions: CAPTIONS,
+  narration: NARRATION,
+  render(t) {
+    // 컷 1: 1440×1920으로 키운 책상 사진. 얼굴과 공책이 둘 다 들어오게 왼쪽 220px를 자른다.
+    // 공책 쪽(아래 왼쪽)으로 6초 동안 8% 밀고 들어간다 — "적기 시작한다"
+    const p1 = ease.inOut(seq(t, 0, CUT));
+    place(i1, 220, lerp(1.0, 1.08, p1), 620, 1500);
+
+    // 컷 2: 카메라를 보는 얼굴. 살짝 물러나며(1.07→1.0) 시선을 받는다
+    const p2 = ease.out(seq(t, CUT, 10));
+    place(i2, 180, lerp(1.07, 1.0, p2), 720, 700);
+    // 디졸브는 두 얼굴이 겹쳐 유령처럼 보였다(미리보기 6.45초). 바로 자른다
+    s2.style.opacity = t >= CUT ? 1 : 0;
+
+    // 제목 카드: 첫 프레임부터 보인다. 0.35초 동안 살짝 내려앉기만 한다
+    const pc = ease.out(seq(t, 0, 0.35));
+    // 컷 2는 얼굴이 크게 들어와 카드가 머리에 닿는다. 컷과 함께 카드를 작게 접는다
+    const shrink = ease.out(seq(t, CUT, CUT + 0.35));
+    card.style.transform = `translateY(${lerp(-10, 0, pc)}px) scale(${lerp(1.03, 1, pc) * lerp(1, 0.72, shrink)})`;
+
+    setSub(t);
+  },
+});
+</script>

@@ -1,0 +1,33 @@
+{
+  "scene": "ig-doyun-01",
+  "lines": [
+    {
+      "index": 1,
+      "file": "01.wav",
+      "start": 0.3,
+      "end": 3.1,
+      "window": 2.8,
+      "estimate": 2.56,
+      "text": "오늘도 퇴근이 늦었습니다."
+    },
+    {
+      "index": 2,
+      "file": "02.wav",
+      "start": 3.3,
+      "end": 6.6,
+      "window": 3.3,
+      "estimate": 3.26,
+      "text": "그래도 딱 오 분만 하기로 했습니다."
+    },
+    {
+      "index": 3,
+      "file": "03.wav",
+      "start": 7,
+      "end": 9.8,
+      "window": 2.8,
+      "estimate": 2.56,
+      "text": "퇴근하고 제일 먼저 뭐 해요?"
+    }
+  ],
+  "sfx": []
+}

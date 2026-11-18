@@ -1,0 +1,33 @@
+{
+  "scene": "ig-sea-01",
+  "lines": [
+    {
+      "index": 1,
+      "file": "01.wav",
+      "start": 0.3,
+      "end": 3.2,
+      "window": 2.9,
+      "estimate": 2.56,
+      "text": "답장 안 한 메시지가 일곱 개."
+    },
+    {
+      "index": 2,
+      "file": "02.wav",
+      "start": 3.4,
+      "end": 7.8,
+      "window": 4.4,
+      "estimate": 4.19,
+      "text": "바쁜 척했지만, 사실 뭐라고 할지 몰라서였어."
+    },
+    {
+      "index": 3,
+      "file": "03.wav",
+      "start": 8.1,
+      "end": 11,
+      "window": 2.9,
+      "estimate": 2.79,
+      "text": "제일 오래 미룬 답장, 며칠이야?"
+    }
+  ],
+  "sfx": []
+}
